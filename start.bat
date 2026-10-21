@@ -46,11 +46,13 @@ if not exist "uploads" mkdir uploads
 
 REM Start the server
 echo.
-echo  [*] Starting FastAPI server on http://127.0.0.1:8000
-echo  [*] API Documentation:  http://127.0.0.1:8000/docs
+echo  [*] Starting FastAPI server accessible locally and on network:
+echo  [*] Local URL:    http://127.0.0.1:8000
+echo  [*] Network URL:  http://0.0.0.0:8000 (Use your IP, e.g. http://192.168.1.11:8000)
+echo  [*] Swagger Docs: http://127.0.0.1:8000/docs
 echo  [*] Press Ctrl+C to stop
 echo.
 
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 pause
