@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment secrets
+.env
+
+# Uploads (user data)
+uploads/
+*.pdf
+*.docx
+*.png
+*.jpg
+*.jpeg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# pytest
+htmlcov/
+.coverage
+coverage.xml

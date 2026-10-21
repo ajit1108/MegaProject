@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>My Documents — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link active" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">My Documents</span>
+      </div>
+      <div class="topbar-right">
+        <a href="/upload.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Upload New</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-folder-open" style="color:var(--primary)"></i> My Documents</h1>
+        <p>All documents you have uploaded. Click <strong>Analyse</strong> on any pending document to run detection.</p>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead>
+              <tr><th>Filename</th><th>Type</th><th>Size</th><th>Uploaded</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="docs-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireAuth(); initSidebar(); initUserInfo();
+
+  async function loadDocs() {
+    try {
+      const docs  = await api.listDocuments();
+      const tbody = document.getElementById('docs-tbody');
+      if (!docs.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">
+          No documents yet. <a href="/upload.html">Upload one</a> to get started.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = docs.map(d => `
+        <tr>
+          <td><span class="fw-600">${escHtml(d.original_filename)}</span></td>
+          <td><span class="badge badge-muted">${escHtml(d.file_type.toUpperCase())}</span></td>
+          <td class="td-muted">${fmtSize(d.file_size)}</td>
+          <td class="td-muted">${fmtDate(d.upload_timestamp)}</td>
+          <td><span class="badge ${d.processing_status==='completed'?'badge-low':d.processing_status==='failed'?'badge-high':'badge-muted'}">
+            ${escHtml(d.processing_status)}</span></td>
+          <td>
+            <div class="flex gap-8">
+              ${d.processing_status !== 'completed'
+                ? `<button class="btn btn-primary btn-sm" onclick="analyse('${d.id}', this)">
+                     <i class="fa-solid fa-brain"></i> Analyse</button>`
+                : `<button class="btn btn-outline btn-sm" onclick="goHistory()">
+                     <i class="fa-solid fa-eye"></i> Results</button>`}
+              <button class="btn btn-danger btn-sm" onclick="deleteDoc('${d.id}', this)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch(err){ toast(err.message,'error'); }
+  }
+
+  async function analyse(id, btn) {
+    if (!confirm('Run analysis on this document?')) return;
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    try {
+      const res = await api.analyzeDocument(id);
+      toast('Analysis complete!','success');
+      window.location.href = `/analysis.html?id=${res.id}`;
+    } catch(err){ toast(err.message,'error'); btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-brain"></i> Analyse'; }
+  }
+
+  async function deleteDoc(id, btn) {
+    if (!confirm('Delete this document and all its analyses?')) return;
+    try {
+      await api.deleteDocument(id);
+      toast('Document deleted.','success');
+      loadDocs();
+    } catch(err){ toast(err.message,'error'); }
+  }
+
+  function goHistory() { window.location.href='/history.html'; }
+
+  loadDocs();
+</script>
+</body>
+</html>

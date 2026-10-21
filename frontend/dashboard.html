@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload">   <i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history">  <i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html"  class="nav-link" data-page="reports">  <i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html"  class="nav-link" data-page="profile">  <i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <a href="/upload.html" class="btn btn-primary btn-sm" id="new-scan-btn">
+          <i class="fa-solid fa-plus"></i> New Scan
+        </a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-gauge-high" style="color:var(--primary)"></i> Dashboard</h1>
+        <p>Your privacy intelligence overview — all data from your actual scans.</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent-color:var(--primary)">
+          <div class="stat-icon" style="color:var(--primary)"><i class="fa-solid fa-file-lines"></i></div>
+          <div class="stat-val" id="stat-total-docs">—</div>
+          <div class="stat-lbl">Documents Uploaded</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--accent)">
+          <div class="stat-icon" style="color:var(--accent)"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+          <div class="stat-val" id="stat-total-analyses">—</div>
+          <div class="stat-lbl">Analyses Run</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--medium)">
+          <div class="stat-icon" style="color:var(--medium)"><i class="fa-solid fa-tags"></i></div>
+          <div class="stat-val" id="stat-total-det">—</div>
+          <div class="stat-lbl">Sensitive Entities Found</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--high)">
+          <div class="stat-icon" style="color:var(--high)"><i class="fa-solid fa-skull-crossbones"></i></div>
+          <div class="stat-val" id="stat-high">—</div>
+          <div class="stat-lbl">High-Risk Documents</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--medium)">
+          <div class="stat-icon" style="color:var(--medium)"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div class="stat-val" id="stat-medium">—</div>
+          <div class="stat-lbl">Medium-Risk Documents</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--low)">
+          <div class="stat-icon" style="color:var(--low)"><i class="fa-solid fa-shield-check"></i></div>
+          <div class="stat-val" id="stat-low">—</div>
+          <div class="stat-lbl">Low-Risk Documents</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="g2 mb-24">
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-chart-pie"></i> Risk Distribution</span></div>
+          <div class="card-body" style="height:220px;position:relative">
+            <canvas id="risk-chart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-chart-bar"></i> Classification Breakdown</span></div>
+          <div class="card-body" style="height:220px;position:relative">
+            <canvas id="cls-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Analyses -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Analyses</span>
+          <a href="/history.html" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0">
+          <table>
+            <thead><tr><th>Document</th><th>Date</th><th>Detections</th><th>Risk Level</th><th>Action</th></tr></thead>
+            <tbody id="recent-tbody">
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-foot">
+          <a href="/upload.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Scan</a>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card mt-24">
+        <div class="card-head"><span class="card-title"><i class="fa-solid fa-lightbulb"></i> Privacy Tips</span></div>
+        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="flex gap-12">
+            <div class="stat-icon" style="width:30px;height:30px;flex-shrink:0;color:var(--primary)"><i class="fa-solid fa-key"></i></div>
+            <p class="text-sm text-muted">Always redact API keys and tokens before sharing documents with external AI services.</p>
+          </div>
+          <div class="flex gap-12">
+            <div class="stat-icon" style="width:30px;height:30px;flex-shrink:0;color:var(--high)"><i class="fa-solid fa-id-card"></i></div>
+            <p class="text-sm text-muted">Mask Aadhaar numbers and PANs in any document before external sharing.</p>
+          </div>
+          <div class="flex gap-12">
+            <div class="stat-icon" style="width:30px;height:30px;flex-shrink:0;color:var(--medium)"><i class="fa-solid fa-envelope"></i></div>
+            <p class="text-sm text-muted">Email addresses in business documents are Confidential — review before forwarding.</p>
+          </div>
+          <div class="flex gap-12">
+            <div class="stat-icon" style="width:30px;height:30px;flex-shrink:0;color:var(--accent)"><i class="fa-solid fa-robot"></i></div>
+            <p class="text-sm text-muted">Use the Privacy Gateway to inspect text before sending it to any cloud AI service.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.page-body -->
+  </div><!-- /.main-area -->
+</div><!-- /.app-shell -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

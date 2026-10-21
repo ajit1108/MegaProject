@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Create Account — SensitiveDataDetector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <h1>Create your account</h1>
+      <p>Start protecting sensitive documents today</p>
+    </div>
+
+    <div id="alert-box" class="hidden"></div>
+
+    <form id="reg-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="name">Full Name</label>
+        <input class="form-control" type="text" id="name" name="name"
+               placeholder="Your full name" required maxlength="100" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input class="form-control" type="email" id="email" name="email"
+               placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" type="password" id="password" name="password"
+               placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+        <div class="form-hint">Minimum 8 characters.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm">Confirm Password</label>
+        <input class="form-control" type="password" id="confirm" name="confirm"
+               placeholder="Repeat password" required autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="reg-btn">
+        <i class="fa-solid fa-user-plus"></i> Create Account
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.85rem;color:var(--text-muted)">
+      Already have an account? <a href="/login.html">Sign in</a>
+    </p>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireGuest();
+
+  document.getElementById('reg-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn  = document.getElementById('reg-btn');
+    const name = document.getElementById('name').value.trim();
+    const email= document.getElementById('email').value.trim();
+    const pass = document.getElementById('password').value;
+    const conf = document.getElementById('confirm').value;
+
+    if (!name||!email||!pass||!conf){ showAlert('All fields are required.','danger'); return; }
+    if (pass.length < 8){ showAlert('Password must be at least 8 characters.','danger'); return; }
+    if (pass !== conf){ showAlert('Passwords do not match.','danger'); return; }
+
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating…';
+    try {
+      await api.register(name, email, pass);
+      showAlert('Account created! Redirecting to login…','success');
+      setTimeout(() => window.location.href = '/login.html', 1800);
+    } catch (err) {
+      showAlert(err.message,'danger');
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
+    }
+  });
+
+  function showAlert(msg, type) {
+    const el = document.getElementById('alert-box');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = `<i class="fa-solid fa-circle-${type==='success'?'check':'exclamation'}"></i> ${escHtml(msg)}`;
+  }
+</script>
+</body>
+</html>

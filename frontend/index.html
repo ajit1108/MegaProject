@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-Based Sensitive Data Detection and Privacy Classification System — protect your documents before sharing.">
+  <title>SensitiveDataDetector — Privacy Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Landing page extra styles */
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;
+      padding:40px 24px;position:relative;overflow:hidden;
+      background:radial-gradient(ellipse at 30% 40%,rgba(91,120,247,.12) 0%,transparent 55%),
+                 radial-gradient(ellipse at 70% 60%,rgba(0,212,170,.08) 0%,transparent 55%)}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;
+      border-radius:20px;background:var(--primary-glow);border:1px solid rgba(91,120,247,.3);
+      color:var(--primary);font-size:.78rem;font-weight:600;letter-spacing:.5px;
+      text-transform:uppercase;margin-bottom:24px}
+    .hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.15;
+      margin-bottom:20px;max-width:760px;margin-left:auto;margin-right:auto}
+    .hero h1 span{background:linear-gradient(135deg,var(--primary),var(--accent));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{font-size:1.05rem;color:var(--text-muted);max-width:560px;margin:0 auto 32px}
+    .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+    .features{padding:80px 24px;max-width:1200px;margin:0 auto}
+    .features h2{text-align:center;font-size:1.8rem;font-weight:800;margin-bottom:10px}
+    .features .subtitle{text-align:center;color:var(--text-muted);margin-bottom:48px}
+    .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+    .feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+      padding:26px;transition:transform var(--t),box-shadow var(--t)}
+    .feat-card:hover{transform:translateY(-3px);box-shadow:var(--sh-md)}
+    .feat-icon{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;
+      justify-content:center;font-size:1.1rem;margin-bottom:14px}
+    .feat-card h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
+    .feat-card p{font-size:.82rem;color:var(--text-muted);line-height:1.6}
+    .cta-section{padding:80px 24px;text-align:center;background:var(--surface);border-top:1px solid var(--border)}
+    .cta-section h2{font-size:2rem;font-weight:800;margin-bottom:12px}
+    .cta-section p{color:var(--text-muted);margin-bottom:28px;font-size:.95rem}
+    .landing-nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(12,15,26,.85);
+      backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+    .landing-logo{display:flex;align-items:center;gap:10px}
+    .landing-logo span{font-weight:700;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <!-- Landing Nav -->
+  <nav class="landing-nav">
+    <div class="landing-logo">
+      <div class="brand-logo" style="width:32px;height:32px;font-size:.9rem;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <span>SensitiveDataDetector</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <a href="/login.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="/register.html" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" style="padding-top:100px;">
+    <div>
+      <div class="hero-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        AI-Powered Privacy Protection
+      </div>
+      <h1>Detect <span>Sensitive Data</span> Before It Leaves Your Control</h1>
+      <p>Upload documents, identify sensitive information with AI-powered detection, calculate privacy risk scores, and download sanitized versions — all locally, with no data sent externally.</p>
+      <div class="hero-actions">
+        <a href="/register.html" class="btn btn-primary btn-lg">
+          <i class="fa-solid fa-rocket"></i> Start Detecting — Free
+        </a>
+        <a href="/login.html" class="btn btn-outline btn-lg">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2>Complete Privacy Intelligence Suite</h2>
+    <p class="subtitle">Everything you need to protect sensitive information in your documents</p>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(91,120,247,.15);color:var(--primary)">
+          <i class="fa-solid fa-file-magnifying-glass"></i>
+        </div>
+        <h3>Multi-Format Extraction</h3>
+        <p>Extract text from PDF, DOCX, TXT, PNG, JPG and JPEG files. Scanned documents use OCR automatically.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(0,212,170,.12);color:var(--accent)">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <h3>AI + Regex Detection</h3>
+        <p>Combines spaCy NLP named-entity recognition with configurable regex patterns for emails, phones, Aadhaar, PAN, API keys, and more.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(255,71,87,.12);color:var(--high)">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <h3>Privacy Classification</h3>
+        <p>Classify detections into Public, Internal, Confidential, or Restricted levels with transparent reasoning for each entity.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(255,165,2,.12);color:var(--medium)">
+          <i class="fa-solid fa-chart-bar"></i>
+        </div>
+        <h3>Privacy Risk Scoring</h3>
+        <p>Deterministic 0–100 risk score based on detection severity, quantity, and type. Low / Medium / High risk levels explained in plain language.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(139,92,246,.15);color:var(--purple)">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h3>Smart Sanitization</h3>
+        <p>Replace sensitive values with redaction placeholders or masked versions. Download clean TXT files with verification re-scan.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(30,144,255,.12);color:var(--info)">
+          <i class="fa-solid fa-shield-virus"></i>
+        </div>
+        <h3>Privacy Gateway</h3>
+        <p>Inspect text before sending to any external AI service. Get a sanitized version and risk assessment first.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to Protect Your Documents?</h2>
+    <p>Create your free account and scan your first document in under 2 minutes.</p>
+    <a href="/register.html" class="btn btn-primary btn-lg">
+      <i class="fa-solid fa-user-plus"></i> Create Free Account
+    </a>
+  </section>
+
+  <footer style="text-align:center;padding:24px;color:var(--text-dim);font-size:.78rem;border-top:1px solid var(--border)">
+    AI-Based Sensitive Data Detection System · Final Year Engineering Project · 2026
+  </footer>
+</body>
+</html>

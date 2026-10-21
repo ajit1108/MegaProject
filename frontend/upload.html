@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Upload Document — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link active" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Upload &amp; Scan</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-cloud-arrow-up" style="color:var(--primary)"></i> Upload Document</h1>
+        <p>Upload a file to extract text and detect sensitive information.</p>
+      </div>
+
+      <div class="g2">
+        <!-- Upload Card -->
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-upload"></i> Select File</span></div>
+          <div class="card-body">
+            <div id="alert-box" class="hidden"></div>
+
+            <div class="upload-zone" id="upload-zone">
+              <div class="upload-zone-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+              <div class="upload-zone-title">Drop your file here or click to browse</div>
+              <div class="upload-zone-sub">PDF, DOCX, TXT, PNG, JPG, JPEG · Max 20 MB</div>
+              <div id="file-info" class="hidden"></div>
+            </div>
+            <input type="file" id="file-input" class="hidden"
+                   accept=".pdf,.docx,.txt,.png,.jpg,.jpeg">
+
+            <div id="progress-wrap" class="hidden mt-16">
+              <div class="flex justify-between mb-8">
+                <span class="text-sm text-muted">Uploading…</span>
+                <span class="text-sm text-muted" id="progress-pct">0%</span>
+              </div>
+              <div class="progress"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+            </div>
+
+            <div class="flex gap-12 mt-16">
+              <button class="btn btn-primary" id="upload-btn" disabled>
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+              </button>
+              <button class="btn btn-outline" id="clear-btn" disabled>
+                <i class="fa-solid fa-xmark"></i> Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Card -->
+        <div>
+          <div class="card mb-16">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-circle-info"></i> Supported Formats</span></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="flex gap-8 items-center">
+                  <i class="fa-solid fa-file-pdf" style="color:var(--high)"></i>
+                  <span class="text-sm">PDF (text &amp; scanned)</span>
+                </div>
+                <div class="flex gap-8 items-center">
+                  <i class="fa-solid fa-file-word" style="color:var(--primary)"></i>
+                  <span class="text-sm">DOCX</span>
+                </div>
+                <div class="flex gap-8 items-center">
+                  <i class="fa-solid fa-file-lines" style="color:var(--accent)"></i>
+                  <span class="text-sm">TXT</span>
+                </div>
+                <div class="flex gap-8 items-center">
+                  <i class="fa-solid fa-image" style="color:var(--medium)"></i>
+                  <span class="text-sm">PNG / JPG / JPEG</span>
+                </div>
+              </div>
+              <div class="separator"></div>
+              <p class="text-sm text-muted">Images and scanned PDFs are processed using OCR (requires Tesseract installed).</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-shield-check"></i> Privacy Guarantee</span></div>
+            <div class="card-body">
+              <ul style="list-style:none;display:flex;flex-direction:column;gap:10px">
+                <li class="flex gap-8"><i class="fa-solid fa-check" style="color:var(--low)"></i><span class="text-sm text-muted">Files processed entirely on your local server</span></li>
+                <li class="flex gap-8"><i class="fa-solid fa-check" style="color:var(--low)"></i><span class="text-sm text-muted">No data sent to external AI services</span></li>
+                <li class="flex gap-8"><i class="fa-solid fa-check" style="color:var(--low)"></i><span class="text-sm text-muted">Only you can access your scans</span></li>
+                <li class="flex gap-8"><i class="fa-solid fa-check" style="color:var(--low)"></i><span class="text-sm text-muted">Delete your data at any time</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- After upload: run analysis -->
+      <div id="analyse-section" class="hidden mt-24">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><i class="fa-solid fa-check-circle" style="color:var(--low)"></i> Upload Successful</span>
+          </div>
+          <div class="card-body">
+            <p class="text-muted mb-16">Your document has been uploaded. Click <strong>Run Analysis</strong> to extract text and detect sensitive data.</p>
+            <div class="flex gap-12">
+              <button class="btn btn-primary" id="analyse-btn">
+                <i class="fa-solid fa-brain"></i> Run Analysis
+              </button>
+              <a href="/documents.html" class="btn btn-outline">
+                <i class="fa-solid fa-folder-open"></i> My Documents
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireAuth(); initSidebar(); initUserInfo();
+
+  let uploadedDocId = null;
+  const fileInput   = document.getElementById('file-input');
+  const uploadZone  = document.getElementById('upload-zone');
+  const uploadBtn   = document.getElementById('upload-btn');
+  const clearBtn    = document.getElementById('clear-btn');
+  const fileInfoEl  = document.getElementById('file-info');
+
+  // ── Drag & drop ────────────────────────────────────────────
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+  function setFile(f) {
+    fileInfoEl.textContent = `${f.name}  (${fmtSize(f.size)})`;
+    fileInfoEl.classList.remove('hidden');
+    uploadBtn.disabled = false; clearBtn.disabled = false;
+  }
+
+  clearBtn.addEventListener('click', () => {
+    fileInput.value = ''; fileInfoEl.classList.add('hidden');
+    uploadBtn.disabled = true; clearBtn.disabled = true;
+    document.getElementById('analyse-section').classList.add('hidden');
+    document.getElementById('alert-box').className = 'hidden';
+  });
+
+  // ── Upload ─────────────────────────────────────────────────
+  uploadBtn.addEventListener('click', async () => {
+    if (!fileInput.files[0]) return;
+    const file = fileInput.files[0];
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar  = document.getElementById('progress-bar');
+    const progressPct  = document.getElementById('progress-pct');
+    const alertBox     = document.getElementById('alert-box');
+
+    uploadBtn.disabled = true;
+    progressWrap.classList.remove('hidden');
+    alertBox.className = 'hidden';
+
+    try {
+      const result = await api.uploadDocument(file, pct => {
+        progressBar.style.width = pct + '%';
+        progressPct.textContent = pct + '%';
+      });
+      uploadedDocId = result.id;
+      progressWrap.classList.add('hidden');
+      alertBox.className = 'alert alert-success';
+      alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> Uploaded <strong>${escHtml(result.original_filename)}</strong> successfully.`;
+      document.getElementById('analyse-section').classList.remove('hidden');
+    } catch (err) {
+      progressWrap.classList.add('hidden');
+      alertBox.className = 'alert alert-danger';
+      alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${escHtml(err.message)}`;
+      uploadBtn.disabled = false;
+    }
+  });
+
+  // ── Analyse ────────────────────────────────────────────────
+  document.getElementById('analyse-btn').addEventListener('click', async () => {
+    if (!uploadedDocId) return;
+    const btn = document.getElementById('analyse-btn');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analysing…';
+    try {
+      const result = await api.analyzeDocument(uploadedDocId);
+      toast('Analysis complete!', 'success');
+      window.location.href = `/analysis.html?id=${result.id}`;
+    } catch (err) {
+      toast(err.message, 'error');
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-brain"></i> Run Analysis';
+    }
+  });
+</script>
+</body>
+</html>

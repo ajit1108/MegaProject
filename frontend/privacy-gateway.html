@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Privacy Gateway — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link active" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Privacy Gateway</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-shield-virus" style="color:var(--primary)"></i> Privacy Gateway</h1>
+        <p>Inspect text for sensitive data before sending it to any external AI service or platform.</p>
+      </div>
+
+      <div class="alert alert-info mb-16">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>Paste text below. The gateway will detect sensitive entities, calculate a risk score, and return a sanitized version you can review before any external sharing. <strong>No text is sent externally by this system.</strong></div>
+      </div>
+
+      <div class="g2">
+        <!-- Input -->
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-keyboard"></i> Input Text</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Text to Inspect</label>
+              <textarea class="form-control" id="gw-input" placeholder="Paste text here…" style="min-height:200px"></textarea>
+              <div class="form-hint">Maximum 100,000 characters.</div>
+            </div>
+            <div class="flex gap-12 items-center">
+              <label class="flex gap-8 items-center" style="cursor:pointer;user-select:none">
+                <input type="checkbox" id="allow-forward">
+                <span class="text-sm">Permit forwarding if Low Risk</span>
+              </label>
+            </div>
+            <button class="btn btn-primary mt-16 btn-block" id="inspect-btn">
+              <i class="fa-solid fa-magnifying-glass-chart"></i> Inspect for Sensitive Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="gw-result" class="hidden">
+          <div class="card mb-16">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-gauge"></i> Inspection Result</span></div>
+            <div class="card-body">
+              <div class="risk-panel" id="gw-risk-panel">
+                <div>
+                  <div class="risk-number" id="gw-score">—</div>
+                  <div class="text-sm text-muted">/ 100</div>
+                </div>
+                <div style="flex:1">
+                  <div class="flex justify-between mb-8">
+                    <span class="fw-600" id="gw-level">—</span>
+                    <span class="text-sm text-muted" id="gw-det-count">—</span>
+                  </div>
+                  <div class="risk-bar-bg"><div class="risk-bar-fill" id="gw-bar" style="width:0%"></div></div>
+                </div>
+              </div>
+              <div id="gw-forward-status" class="mt-16"></div>
+              <div id="gw-warnings" class="mt-8"></div>
+            </div>
+          </div>
+
+          <div class="card mb-16">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-eye-slash"></i> Sanitized Output</span></div>
+            <div class="card-body">
+              <div class="text-preview" id="gw-sanitized"></div>
+              <button class="btn btn-success btn-sm mt-8" id="gw-copy-btn">
+                <i class="fa-solid fa-copy"></i> Copy Sanitized Text
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-tags"></i> Detections</span></div>
+            <div class="table-wrap" style="border:none">
+              <table>
+                <thead><tr><th>Entity Type</th><th>Value</th><th>Classification</th><th>Method</th></tr></thead>
+                <tbody id="gw-det-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireAuth(); initSidebar(); initUserInfo();
+
+  document.getElementById('inspect-btn').addEventListener('click', async () => {
+    const text = document.getElementById('gw-input').value.trim();
+    if (!text) { toast('Please enter text to inspect.','warning'); return; }
+    const allowFwd = document.getElementById('allow-forward').checked;
+    const btn = document.getElementById('inspect-btn');
+    btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Inspecting…';
+
+    try {
+      const res = await api.gatewayInspect(text, allowFwd);
+      renderGatewayResult(res);
+      document.getElementById('gw-result').classList.remove('hidden');
+    } catch(err){ toast(err.message,'error'); }
+    btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-magnifying-glass-chart"></i> Inspect for Sensitive Data';
+  });
+
+  document.getElementById('gw-copy-btn')?.addEventListener('click', () => {
+    const txt = document.getElementById('gw-sanitized').textContent;
+    navigator.clipboard.writeText(txt).then(()=>toast('Copied!','success'));
+  });
+
+  function renderGatewayResult(res) {
+    const cls = {'High Risk':'risk-high','Medium Risk':'risk-medium','Low Risk':'risk-low'}[res.risk_level]||'risk-low';
+    document.getElementById('gw-risk-panel').className = `risk-panel ${cls}`;
+    document.getElementById('gw-score').textContent = (res.risk_score||0).toFixed(1);
+    document.getElementById('gw-level').textContent  = res.risk_level;
+    document.getElementById('gw-det-count').textContent = `${res.total_detections} detection(s)`;
+    document.getElementById('gw-bar').style.width = Math.min(res.risk_score||0,100)+'%';
+    document.getElementById('gw-sanitized').textContent = res.sanitized_text||'';
+
+    const fwdEl = document.getElementById('gw-forward-status');
+    fwdEl.innerHTML = res.permit_forward
+      ? '<div class="badge badge-low"><i class="fa-solid fa-check"></i> Forwarding permitted (Low Risk)</div>'
+      : '<div class="badge badge-high"><i class="fa-solid fa-xmark"></i> Forwarding NOT recommended — review sanitized text first</div>';
+
+    const warnEl = document.getElementById('gw-warnings');
+    warnEl.innerHTML = (res.warnings||[]).map(w=>`<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${escHtml(w)}</div>`).join('');
+
+    const tbody = document.getElementById('gw-det-tbody');
+    if (!res.detections?.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">No sensitive entities detected.</td></tr>';
+    } else {
+      tbody.innerHTML = res.detections.map(d=>`
+        <tr>
+          <td><span class="badge badge-muted text-mono">${escHtml(d.entity_type)}</span></td>
+          <td class="text-mono text-sm">${escHtml(d.matched_value||'***')}</td>
+          <td>${clsBadge(d.privacy_class)}</td>
+          <td><span class="badge badge-primary">${escHtml(d.detection_method)}</span></td>
+        </tr>`).join('');
+    }
+  }
+</script>
+</body>
+</html>

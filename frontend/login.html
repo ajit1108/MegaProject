@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Sign In — SensitiveDataDetector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <h1>Welcome back</h1>
+      <p>AI-Based Sensitive Data Detection System</p>
+    </div>
+
+    <div id="alert-box" class="hidden"></div>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input class="form-control" type="email" id="email" name="email"
+               placeholder="you@example.com" required autocomplete="email" autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control" type="password" id="password" name="password"
+               placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="login-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:20px;font-size:.85rem;color:var(--text-muted)">
+      Don't have an account? <a href="/register.html">Create one</a>
+    </p>
+    <p style="text-align:center;margin-top:8px;font-size:.78rem;">
+      <a href="/" style="color:var(--text-dim)"><i class="fa-solid fa-arrow-left"></i> Back to home</a>
+    </p>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireGuest();
+  if (window.location.search.includes('expired=1')) {
+    showAlert('Your session has expired. Please sign in again.', 'warning');
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn   = document.getElementById('login-btn');
+    const alert = document.getElementById('alert-box');
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    alert.className = 'hidden'; alert.textContent = '';
+    if (!email || !pass) { showAlert('Please enter your email and password.','danger'); return; }
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in…';
+    try {
+      const data = await api.login(email, pass);
+      setToken(data.access_token);
+      setUser({ id: data.user_id, name: data.name, role: data.role });
+      window.location.href = '/dashboard.html';
+    } catch (err) {
+      showAlert(err.message, 'danger');
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+    }
+  });
+
+  function showAlert(msg, type) {
+    const el = document.getElementById('alert-box');
+    el.className = `alert alert-${type}`;
+    el.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${escHtml(msg)}`;
+  }
+</script>
+</body>
+</html>

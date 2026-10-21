@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Analysis Results — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link active" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Analysis Results</span>
+      </div>
+      <div class="topbar-right">
+        <a href="/upload.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Scan</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div id="loading-section" style="text-align:center;padding:60px">
+        <div class="spinner" style="margin:0 auto 16px"></div>
+        <p class="text-muted">Loading analysis…</p>
+      </div>
+
+      <div id="content-section" class="hidden">
+        <!-- Header -->
+        <div class="page-header">
+          <h1><i class="fa-solid fa-file-magnifying-glass" style="color:var(--primary)"></i>
+            <span id="doc-name">Analysis Results</span>
+          </h1>
+          <p id="doc-meta" class="text-muted"></p>
+        </div>
+
+        <!-- Risk Panel + Summary -->
+        <div class="g2 mb-24">
+          <div class="card">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-gauge"></i> Privacy Risk Score</span></div>
+            <div class="card-body">
+              <div class="risk-panel" id="risk-panel">
+                <div>
+                  <div class="risk-number" id="risk-number">—</div>
+                  <div class="text-sm text-muted" style="margin-top:4px">out of 100</div>
+                </div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                    <span class="fw-600" id="risk-level-txt">—</span>
+                    <span class="text-sm text-muted" id="det-count-txt">0 detections</span>
+                  </div>
+                  <div class="risk-bar-bg">
+                    <div class="risk-bar-fill" id="risk-bar" style="width:0%"></div>
+                  </div>
+                  <p class="text-sm text-muted mt-8" id="risk-explanation"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-layer-group"></i> Classification Summary</span></div>
+            <div class="card-body" id="class-summary"></div>
+          </div>
+        </div>
+
+        <!-- OCR warning -->
+        <div id="ocr-warn" class="hidden alert alert-warning mb-16">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>OCR was used</strong> to extract text from this document. Detection accuracy depends on image clarity.
+            <div id="extraction-warnings"></div>
+          </div>
+        </div>
+
+        <!-- Text Preview with Highlights -->
+        <div class="card mb-24">
+          <div class="card-head">
+            <span class="card-title"><i class="fa-solid fa-align-left"></i> Extracted Text Preview</span>
+            <div class="legend">
+              <span class="legend-item"><span class="legend-dot" style="background:rgba(255,71,87,.5)"></span>Restricted</span>
+              <span class="legend-item"><span class="legend-dot" style="background:rgba(255,107,53,.5)"></span>Confidential</span>
+              <span class="legend-item"><span class="legend-dot" style="background:rgba(255,165,2,.5)"></span>Internal</span>
+              <span class="legend-item"><span class="legend-dot" style="background:rgba(46,213,115,.3)"></span>Public</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="text-preview" id="text-preview">No text extracted.</div>
+          </div>
+        </div>
+
+        <!-- Detections Table -->
+        <div class="card mb-24">
+          <div class="card-head">
+            <span class="card-title"><i class="fa-solid fa-list-check"></i> Detected Entities</span>
+            <div class="flex gap-8">
+              <select class="form-control" id="filter-class" style="width:160px;padding:6px 10px;font-size:.8rem">
+                <option value="">All Classifications</option>
+                <option>Restricted</option><option>Confidential</option>
+                <option>Internal</option><option>Public</option>
+              </select>
+              <select class="form-control" id="filter-method" style="width:150px;padding:6px 10px;font-size:.8rem">
+                <option value="">All Methods</option>
+                <option>regex</option><option>nlp</option><option>both</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr><th>Entity Type</th><th>Value (Protected)</th><th>Classification</th>
+                    <th>Method</th><th>Confidence</th><th>Reason</th></tr>
+              </thead>
+              <tbody id="det-tbody">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Sanitization</span></div>
+          <div class="card-body">
+            <p class="text-muted text-sm mb-16">Replace detected sensitive values with redaction placeholders or masked versions. A re-scan will verify the sanitized output.</p>
+            <div class="flex gap-12 items-center">
+              <select class="form-control" id="san-mode" style="width:180px">
+                <option value="redact">Full Redaction</option>
+                <option value="mask">Partial Masking</option>
+              </select>
+              <button class="btn btn-primary" id="sanitize-btn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Sanitize Document
+              </button>
+            </div>
+            <div id="san-result" class="hidden mt-16">
+              <div class="alert alert-success" id="san-alert"></div>
+              <div class="g2">
+                <div>
+                  <h4 class="text-sm fw-600 mb-8">Original (preview)</h4>
+                  <div class="text-preview" id="orig-preview" style="max-height:200px"></div>
+                </div>
+                <div>
+                  <h4 class="text-sm fw-600 mb-8">Sanitized Output</h4>
+                  <div class="text-preview" id="san-preview" style="max-height:200px"></div>
+                </div>
+              </div>
+              <div id="san-warning" class="alert alert-warning hidden mt-8"></div>
+              <button class="btn btn-success mt-16" id="download-btn">
+                <i class="fa-solid fa-download"></i> Download Sanitized TXT
+              </button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#content-section -->
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/analysis.js"></script>
+</body>
+</html>

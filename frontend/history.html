@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Analysis History — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link active" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Analysis History</span>
+      </div>
+      <div class="topbar-right">
+        <a href="/upload.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> New Scan</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary)"></i> Analysis History</h1>
+        <p>All your previous document analyses. Filter by risk level.</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-12 mb-16">
+        <select class="form-control" id="filter-risk" style="width:200px">
+          <option value="">All Risk Levels</option>
+          <option value="High Risk">High Risk</option>
+          <option value="Medium Risk">Medium Risk</option>
+          <option value="Low Risk">Low Risk</option>
+        </select>
+        <button class="btn btn-outline" onclick="loadHistory()"><i class="fa-solid fa-filter"></i> Apply</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead>
+              <tr><th>Document</th><th>Date</th><th>Detections</th><th>Risk Score</th><th>Risk Level</th><th>Sanitized</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="hist-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireAuth(); initSidebar(); initUserInfo();
+
+  async function loadHistory() {
+    const risk  = document.getElementById('filter-risk').value;
+    const tbody = document.getElementById('hist-tbody');
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">Loading…</td></tr>`;
+    try {
+      const data = await api.analysisHistory(risk, 0, 50);
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
+          No analyses found. <a href="/upload.html">Upload a document</a> to start.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map(a => `
+        <tr>
+          <td><span class="fw-600">${escHtml(a.document_name)}</span></td>
+          <td class="td-muted">${fmtDate(a.created_at)}</td>
+          <td><span class="badge badge-muted">${a.total_detections}</span></td>
+          <td class="fw-600">${(a.risk_score||0).toFixed(1)}</td>
+          <td>${riskBadge(a.risk_level)}</td>
+          <td>${a.sanitization_status==='sanitized'
+            ? '<span class="badge badge-low"><i class="fa-solid fa-check"></i> Yes</span>'
+            : '<span class="badge badge-muted">No</span>'}</td>
+          <td>
+            <div class="flex gap-8">
+              <a href="/analysis.html?id=${a.id}" class="btn btn-outline btn-sm">
+                <i class="fa-solid fa-eye"></i> View
+              </a>
+              ${a.sanitization_status==='sanitized'
+                ? `<button class="btn btn-success btn-sm" onclick="download('${a.id}')">
+                     <i class="fa-solid fa-download"></i>
+                   </button>` : ''}
+              <button class="btn btn-danger btn-sm" onclick="deleteAnalysis('${a.id}', this)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch(err){ toast(err.message,'error'); }
+  }
+
+  async function download(id) {
+    try { await api.downloadSanitized(id); toast('Download started.','success'); }
+    catch(err){ toast(err.message,'error'); }
+  }
+
+  async function deleteAnalysis(id, btn) {
+    if (!confirm('Delete this analysis record?')) return;
+    try {
+      await api.deleteAnalysis(id);
+      toast('Deleted.','success');
+      loadHistory();
+    } catch(err){ toast(err.message,'error'); }
+  }
+
+  loadHistory();
+</script>
+</body>
+</html>

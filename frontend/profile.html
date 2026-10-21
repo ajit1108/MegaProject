@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Profile — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link active" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Profile &amp; Settings</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-user-shield" style="color:var(--primary)"></i> Your Profile</h1>
+        <p>Account information retrieved from your session.</p>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-id-badge"></i> Account Details</span></div>
+          <div class="card-body">
+            <div style="text-align:center;margin-bottom:24px">
+              <div class="u-avatar" id="profile-avatar" style="width:70px;height:70px;font-size:1.8rem;margin:0 auto 12px">U</div>
+              <div class="fw-700" id="profile-name" style="font-size:1.1rem">—</div>
+              <div class="text-muted text-sm" id="profile-role">—</div>
+            </div>
+            <div class="separator"></div>
+            <div class="flex justify-between mt-16 mb-8">
+              <span class="text-muted text-sm">Email</span>
+              <span class="text-sm fw-600" id="profile-email">—</span>
+            </div>
+            <div class="flex justify-between mb-8">
+              <span class="text-muted text-sm">Member Since</span>
+              <span class="text-sm fw-600" id="profile-created">—</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted text-sm">Role</span>
+              <span class="badge badge-primary" id="profile-role-badge">user</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-shield-check"></i> Security &amp; Privacy</span></div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <i class="fa-solid fa-circle-info"></i>
+              <div>Your documents and analyses are private and accessible only to you. No data is shared with external services.</div>
+            </div>
+
+            <div class="separator"></div>
+
+            <h4 class="text-sm fw-600 mb-8 mt-16">Detection System Status</h4>
+            <div id="sys-status" class="flex flex-col gap-8">
+              <div class="flex justify-between">
+                <span class="text-sm text-muted">API Backend</span>
+                <span class="badge badge-low" id="api-status">Checking…</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-muted">NLP (spaCy)</span>
+                <span class="badge badge-muted" id="nlp-status">Checking…</span>
+              </div>
+            </div>
+
+            <div class="separator"></div>
+
+            <button class="btn btn-danger btn-block mt-16" id="logout-all-btn">
+              <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireAuth(); initSidebar();
+
+  (async () => {
+    try {
+      const user = await api.me();
+      setUser(user);
+      document.getElementById('profile-avatar').textContent = (user.name||'U')[0].toUpperCase();
+      document.getElementById('sidebar-user-avatar').textContent = (user.name||'U')[0].toUpperCase();
+      document.getElementById('sidebar-user-name').textContent = user.name;
+      document.getElementById('sidebar-user-role').textContent = capitalize(user.role||'user');
+      document.getElementById('profile-name').textContent = user.name;
+      document.getElementById('profile-email').textContent = user.email;
+      document.getElementById('profile-role').textContent = capitalize(user.role||'user');
+      document.getElementById('profile-role-badge').textContent = user.role||'user';
+      document.getElementById('profile-created').textContent = fmtDate(user.created_at);
+    } catch(err){ toast(err.message,'error'); }
+
+    // System health
+    try {
+      const h = await api.health();
+      document.getElementById('api-status').className = 'badge badge-low';
+      document.getElementById('api-status').textContent = 'Online';
+      const nlpEl = document.getElementById('nlp-status');
+      nlpEl.className = h.nlp_available ? 'badge badge-low' : 'badge badge-warning';
+      nlpEl.textContent = h.nlp_available ? 'Available' : 'Not installed';
+    } catch {
+      document.getElementById('api-status').className = 'badge badge-high';
+      document.getElementById('api-status').textContent = 'Error';
+    }
+  })();
+
+  document.getElementById('logout-all-btn').addEventListener('click', () => {
+    if (confirm('Sign out?')) logout();
+  });
+</script>
+</body>
+</html>
