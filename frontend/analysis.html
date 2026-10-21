@@ -163,19 +163,28 @@
             </div>
             <div id="san-result" class="hidden mt-16">
               <div class="alert alert-success" id="san-alert"></div>
+              
+              <!-- Visual Image / Document Preview (for images) -->
+              <div id="san-image-container" class="hidden mt-16 mb-16">
+                <h4 class="text-sm fw-600 mb-8"><i class="fa-solid fa-image"></i> Visual Redaction Preview (Actual Pixels Redacted)</h4>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center">
+                  <img id="san-img-preview" src="" alt="Sanitized document preview" style="max-width:100%;max-height:480px;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.25)">
+                </div>
+              </div>
+
               <div class="g2">
                 <div>
                   <h4 class="text-sm fw-600 mb-8">Original (preview)</h4>
                   <div class="text-preview" id="orig-preview" style="max-height:200px"></div>
                 </div>
                 <div>
-                  <h4 class="text-sm fw-600 mb-8">Sanitized Output</h4>
+                  <h4 class="text-sm fw-600 mb-8">Sanitized Text Output</h4>
                   <div class="text-preview" id="san-preview" style="max-height:200px"></div>
                 </div>
               </div>
               <div id="san-warning" class="alert alert-warning hidden mt-8"></div>
               <button class="btn btn-success mt-16" id="download-btn">
-                <i class="fa-solid fa-download"></i> Download Sanitized TXT
+                <i class="fa-solid fa-download"></i> Download Sanitized File
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@
 # ============================================================
 import io
 import logging
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -35,12 +36,27 @@ def extract_text(content: bytes, filename: str) -> ExtractionResult:
     elif ext == "txt":
         return _extract_txt(content, warnings)
     elif ext in ("png", "jpg", "jpeg"):
-        return _extract_image_ocr(content, warnings)
+        return _extract_image_ocr(content, ext, warnings)
     else:
         return ExtractionResult(
             text="", file_type=ext, used_ocr=False, warnings=[],
             success=False, error=f"Unsupported file type: {ext}"
         )
+
+
+def _configure_tesseract():
+    """Ensure pytesseract points to the effective tesseract binary."""
+    try:
+        import pytesseract
+        from app.config import get_settings
+        settings = get_settings()
+        cmd = settings.effective_tesseract_cmd
+        if cmd and os.path.isfile(cmd):
+            pytesseract.pytesseract.tesseract_cmd = cmd
+        return pytesseract
+    except Exception as exc:
+        logger.warning("Could not configure pytesseract: %s", exc)
+        return None
 
 
 # ── PDF ───────────────────────────────────────────────────────
@@ -50,61 +66,55 @@ def _extract_pdf(content: bytes, warnings: list[str]) -> ExtractionResult:
             import pymupdf as fitz
         except ImportError:
             import fitz
-        doc = fitz.open(stream=content, filetype="pdf")
-        pages_text = []
-        for page in doc:
-            pages_text.append(page.get_text("text"))
-        doc.close()
-
-        full_text = "\n".join(pages_text).strip()
-
-        # If very little text was extracted, attempt OCR
-        if len(full_text) < 50:
-            warnings.append(
-                "PDF appears to contain little selectable text. "
-                "Attempting OCR on page images."
-            )
-            return _pdf_ocr_fallback(content, warnings)
-
-        return ExtractionResult(
-            text=full_text, file_type="pdf", used_ocr=False,
-            warnings=warnings, success=True
-        )
-
     except ImportError:
         return ExtractionResult(
             text="", file_type="pdf", used_ocr=False, warnings=[],
             success=False, error="PyMuPDF (fitz) is not installed."
         )
+
+    try:
+        doc = fitz.open(stream=content, filetype="pdf")
+        pages_text: list[str] = []
+        used_ocr = False
+
+        for page_idx, page in enumerate(doc):
+            p_text = page.get_text("text").strip()
+            # If the page contains very little or no selectable text, attempt OCR
+            if len(p_text) < 20:
+                try:
+                    mat = fitz.Matrix(2, 2)  # 2x zoom for clarity
+                    pix = page.get_pixmap(matrix=mat)
+                    img_bytes = pix.tobytes("png")
+                    ocr_text = _ocr_image_bytes(img_bytes)
+                    if ocr_text and ocr_text.strip():
+                        p_text = ocr_text.strip()
+                        used_ocr = True
+                except Exception as ocr_err:
+                    logger.warning("OCR failed for PDF page %d: %s", page_idx + 1, ocr_err)
+            pages_text.append(p_text)
+
+        doc.close()
+        full_text = "\n\n".join([p for p in pages_text if p]).strip()
+
+        if used_ocr:
+            warnings.append("OCR was performed on scanned or low-text PDF pages.")
+
+        if not full_text:
+            warnings.append("PDF contains no readable text or scanned content.")
+
+        return ExtractionResult(
+            text=full_text,
+            file_type="pdf",
+            used_ocr=used_ocr,
+            warnings=warnings,
+            success=True,
+        )
+
     except Exception as exc:
         logger.warning("PDF extraction error: %s", exc)
         return ExtractionResult(
             text="", file_type="pdf", used_ocr=False, warnings=[],
             success=False, error=f"PDF extraction failed: {exc}"
-        )
-
-
-def _pdf_ocr_fallback(content: bytes, warnings: list[str]) -> ExtractionResult:
-    """Render PDF pages as images and run Tesseract OCR."""
-    try:
-        import fitz
-        doc = fitz.open(stream=content, filetype="pdf")
-        texts = []
-        for page in doc:
-            mat = fitz.Matrix(2, 2)   # 2× zoom for better OCR quality
-            pix = page.get_pixmap(matrix=mat)
-            img_bytes = pix.tobytes("png")
-            page_text = _ocr_image_bytes(img_bytes)
-            texts.append(page_text)
-        doc.close()
-        return ExtractionResult(
-            text="\n".join(texts).strip(), file_type="pdf",
-            used_ocr=True, warnings=warnings, success=True
-        )
-    except Exception as exc:
-        return ExtractionResult(
-            text="", file_type="pdf", used_ocr=True, warnings=warnings,
-            success=False, error=f"PDF OCR fallback failed: {exc}"
         )
 
 
@@ -120,7 +130,9 @@ def _extract_docx(content: bytes, warnings: list[str]) -> ExtractionResult:
                 for cell in row.cells:
                     if cell.text.strip():
                         paragraphs.append(cell.text.strip())
-        text = "\n".join(paragraphs)
+        text = "\n".join(paragraphs).strip()
+        if not text:
+            warnings.append("DOCX contains no extractable text.")
         return ExtractionResult(
             text=text, file_type="docx", used_ocr=False,
             warnings=warnings, success=True
@@ -140,9 +152,9 @@ def _extract_docx(content: bytes, warnings: list[str]) -> ExtractionResult:
 
 # ── TXT ───────────────────────────────────────────────────────
 def _extract_txt(content: bytes, warnings: list[str]) -> ExtractionResult:
-    for encoding in ("utf-8", "utf-16", "latin-1"):
+    for encoding in ("utf-8", "utf-16", "latin-1", "ascii"):
         try:
-            text = content.decode(encoding)
+            text = content.decode(encoding).strip()
             return ExtractionResult(
                 text=text, file_type="txt", used_ocr=False,
                 warnings=warnings, success=True
@@ -156,30 +168,56 @@ def _extract_txt(content: bytes, warnings: list[str]) -> ExtractionResult:
 
 
 # ── Image OCR ─────────────────────────────────────────────────
-def _extract_image_ocr(content: bytes, warnings: list[str]) -> ExtractionResult:
-    text = _ocr_image_bytes(content)
+def _extract_image_ocr(content: bytes, ext: str, warnings: list[str]) -> ExtractionResult:
+    try:
+        from PIL import Image, ImageOps
+        image = Image.open(io.BytesIO(content))
+        # Handle EXIF orientation (rotated images from phone/camera)
+        image = ImageOps.exif_transpose(image)
+        if image is None:
+            image = Image.open(io.BytesIO(content))
+    except Exception as exc:
+        return ExtractionResult(
+            text="", file_type=ext, used_ocr=False, warnings=[],
+            success=False, error=f"Invalid or corrupted image: {exc}"
+        )
+
+    text = _ocr_pil_image(image)
     if not text:
-        warnings.append("OCR produced no output. Check that Tesseract is installed and the image is clear.")
+        warnings.append("No readable text found in the image. Please ensure the image is clear and well-lit.")
+
     return ExtractionResult(
-        text=text, file_type="image", used_ocr=True,
-        warnings=warnings, success=bool(text)
+        text=text, file_type=ext, used_ocr=True,
+        warnings=warnings, success=True
     )
 
 
-def _ocr_image_bytes(img_bytes: bytes) -> str:
-    """Run Tesseract OCR on raw image bytes via pytesseract."""
+def _ocr_pil_image(image) -> str:
+    """Run Tesseract OCR on a PIL Image object."""
     try:
-        import pytesseract
-        from PIL import Image
-        from app.config import get_settings
-        settings = get_settings()
-        if settings.tesseract_cmd:
-            pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
-        image = Image.open(io.BytesIO(img_bytes))
-        return pytesseract.image_to_string(image, lang="eng")
-    except ImportError:
-        logger.warning("pytesseract or Pillow not installed.")
-        return ""
+        pytesseract = _configure_tesseract()
+        if pytesseract is None:
+            return ""
+
+        # Preprocessing: convert to grayscale or RGB if needed
+        proc_img = image
+        if proc_img.mode not in ("RGB", "L"):
+            proc_img = proc_img.convert("RGB")
+
+        text = pytesseract.image_to_string(proc_img, lang="eng")
+        return text.strip()
     except Exception as exc:
         logger.warning("OCR failed: %s", exc)
+        return ""
+
+
+def _ocr_image_bytes(img_bytes: bytes) -> str:
+    """Run Tesseract OCR on raw image bytes."""
+    try:
+        from PIL import Image, ImageOps
+        image = Image.open(io.BytesIO(img_bytes))
+        image = ImageOps.exif_transpose(image) or image
+        return _ocr_pil_image(image)
+    except Exception as exc:
+        logger.warning("Failed to open image for OCR: %s", exc)
         return ""

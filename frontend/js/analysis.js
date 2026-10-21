@@ -96,6 +96,18 @@ function renderAnalysis(a) {
 
   // Detections table
   renderDetections(a.detections || []);
+
+  // If already sanitized previously, display result
+  if (a.sanitization_status === 'sanitized') {
+    renderSanitization({
+      sanitized_filename:   a.sanitized_filename,
+      sanitized_file_type:   a.sanitized_file_type,
+      sanitized_text:        a.sanitized_text || '',
+      remaining_detections:  0,
+      original_text_preview: a.extracted_text_preview || '',
+      warnings:              [],
+    }, a);
+  }
 }
 
 function renderTextPreview(text, detections) {
@@ -147,18 +159,52 @@ function renderDetections(detections) {
     </tr>`).join('');
 }
 
-function renderSanitization(res, a) {
+async function renderSanitization(res, a) {
   const section = document.getElementById('san-result');
   const alert   = document.getElementById('san-alert');
   const warn    = document.getElementById('san-warning');
   section.classList.remove('hidden');
   alert.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sanitization complete.
-    <strong>${res.remaining_detections}</strong> pattern(s) may still be detectable in the output.`;
-  document.getElementById('orig-preview').textContent = res.original_text_preview || '';
-  document.getElementById('san-preview').textContent  = (res.sanitized_text||'').slice(0,800);
+    <strong>${res.remaining_detections || 0}</strong> pattern(s) may still be detectable in the output.`;
+  document.getElementById('orig-preview').textContent = res.original_text_preview || (a && a.extracted_text_preview) || '';
+  document.getElementById('san-preview').textContent  = (res.sanitized_text || '').slice(0, 800);
+  
   if (res.warnings?.length) {
     warn.classList.remove('hidden');
     warn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${res.warnings.map(escHtml).join('<br>')}`;
+  } else {
+    warn.classList.add('hidden');
+  }
+
+  // Update download button label
+  const dlBtn = document.getElementById('download-btn');
+  const filename = res.sanitized_filename || (a ? (a.document_name || '').replace(/\.[^/.]+$/, "") + '_sanitized' : 'document');
+  if (dlBtn) {
+    dlBtn.innerHTML = `<i class="fa-solid fa-download"></i> Download ${escHtml(filename)}`;
+  }
+
+  // Visual Image Preview for image file types
+  const fileType = (res.sanitized_file_type || (filename.includes('.') ? filename.split('.').pop() : '')).toLowerCase();
+  const imgContainer = document.getElementById('san-image-container');
+  const imgPreview   = document.getElementById('san-img-preview');
+  if (imgContainer && imgPreview) {
+    if (['png', 'jpg', 'jpeg'].includes(fileType)) {
+      try {
+        const token = getToken();
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const aid = res.analysis_id || (a && a.id);
+        const r = await fetch(API_BASE + `/api/analysis/${aid}/sanitized-preview`, { headers });
+        if (r.ok) {
+          const blob = await r.blob();
+          imgPreview.src = URL.createObjectURL(blob);
+          imgContainer.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.warn('Could not load image preview:', err);
+      }
+    } else {
+      imgContainer.classList.add('hidden');
+    }
   }
 }
 

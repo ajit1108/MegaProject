@@ -32,6 +32,23 @@ class Settings(BaseSettings):
         extra = "ignore"
 
     @property
+    def effective_tesseract_cmd(self) -> str:
+        import os, shutil
+        if self.tesseract_cmd and os.path.isfile(self.tesseract_cmd):
+            return self.tesseract_cmd
+        candidates = [
+            os.path.expanduser(r"~\Tesseract-OCR\tesseract.exe"),
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+            os.path.expanduser(r"~\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"),
+            shutil.which("tesseract") or "",
+        ]
+        for c in candidates:
+            if c and os.path.isfile(c):
+                return c
+        return self.tesseract_cmd or ""
+
+    @property
     def max_upload_size_bytes(self) -> int:
         return self.max_upload_size_mb * 1024 * 1024
 

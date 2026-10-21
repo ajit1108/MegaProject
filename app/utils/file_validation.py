@@ -51,6 +51,19 @@ async def validate_upload(file: UploadFile) -> bytes:
             detail=f"File content type '{detected_mime}' does not match a supported format.",
         )
 
+    # --- Image integrity check ---
+    if ext in ("png", "jpg", "jpeg") or detected_mime.startswith("image/"):
+        try:
+            from PIL import Image
+            import io
+            img = Image.open(io.BytesIO(content))
+            img.verify()
+        except Exception:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded image is corrupted or invalid.",
+            )
+
     return content
 
 
