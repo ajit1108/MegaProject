@@ -35,6 +35,18 @@
       </button>
     </form>
 
+    <div style="margin-top:16px;padding:12px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);font-size:.8rem">
+      <div style="color:var(--text-muted);font-weight:600;margin-bottom:6px"><i class="fa-solid fa-key"></i> Quick Fill Account:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-fill-ajit" style="font-size:.78rem;padding:4px 8px">
+          Ajit (ajitbirajdar1108@gmail.com)
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-fill-demo" style="font-size:.78rem;padding:4px 8px">
+          Demo (demo@example.com)
+        </button>
+      </div>
+    </div>
+
     <p style="text-align:center;margin-top:20px;font-size:.85rem;color:var(--text-muted)">
       Don't have an account? <a href="/register.html">Create one</a>
     </p>
@@ -47,10 +59,22 @@
 <script src="/js/api.js"></script>
 <script src="/js/auth.js"></script>
 <script>
-  requireGuest();
   if (window.location.search.includes('expired=1')) {
+    clearToken();
     showAlert('Your session has expired. Please sign in again.', 'warning');
+  } else {
+    requireGuest();
   }
+
+  document.getElementById('btn-fill-ajit')?.addEventListener('click', () => {
+    document.getElementById('email').value = 'ajitbirajdar1108@gmail.com';
+    document.getElementById('password').value = 'Ajit@1108';
+  });
+
+  document.getElementById('btn-fill-demo')?.addEventListener('click', () => {
+    document.getElementById('email').value = 'demo@example.com';
+    document.getElementById('password').value = 'Password@123';
+  });
 
   document.getElementById('login-form').addEventListener('submit', async e => {
     e.preventDefault();

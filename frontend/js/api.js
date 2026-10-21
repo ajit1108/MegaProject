@@ -96,8 +96,8 @@ async function request(method, path, body = null) {
       if (res.status === 401 && !path.startsWith('/api/auth/login')) {
         clearToken();
         if (!window.location.pathname.endsWith('login.html') && !window.location.pathname.endsWith('register.html')) {
-          window.location.href = '/login.html?expired=1';
-          return;
+          window.location.replace('/login.html?expired=1');
+          throw new ApiError('Your session has expired. Redirecting to sign in...', 401);
         }
       }
       const msg = data.detail || data.message || `HTTP ${res.status}`;
@@ -132,9 +132,10 @@ async function uploadRequest(path, formData, onProgress) {
           if (xhr.status === 401) {
             clearToken();
             if (!window.location.pathname.endsWith('login.html')) {
-              window.location.href = '/login.html?expired=1';
-              return;
+              window.location.replace('/login.html?expired=1');
             }
+            reject(new ApiError('Your session has expired. Redirecting to sign in...', 401));
+            return;
           }
           reject(new ApiError(data.detail || `HTTP ${xhr.status}`, xhr.status, data));
         }
@@ -156,9 +157,9 @@ async function downloadRequest(path) {
     if (res.status === 401) {
       clearToken();
       if (!window.location.pathname.endsWith('login.html')) {
-        window.location.href = '/login.html?expired=1';
-        return;
+        window.location.replace('/login.html?expired=1');
       }
+      throw new ApiError('Your session has expired. Redirecting to sign in...', 401);
     }
     const data = await res.json().catch(() => ({}));
     throw new ApiError(data.detail || `HTTP ${res.status}`, res.status);
