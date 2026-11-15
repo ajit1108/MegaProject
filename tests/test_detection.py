@@ -53,16 +53,25 @@ class TestPhoneDetection:
         assert len(phones) >= 1
 
 
+_AADHAAR_TYPES = ("AADHAAR", "AADHAAR_FORMAT")
+
+
 class TestAadhaarDetection:
     def test_aadhaar_pattern(self):
         hits = run_regex_detection("Aadhaar: 1234 5678 9012")
-        aadhaar = [h for h in hits if h.entity_type == "AADHAAR"]
+        aadhaar = [h for h in hits if h.entity_type in _AADHAAR_TYPES]
         assert len(aadhaar) >= 1
 
     def test_aadhaar_without_spaces(self):
         hits = run_regex_detection("ID: 123456789012")
-        aadhaar = [h for h in hits if h.entity_type == "AADHAAR"]
+        aadhaar = [h for h in hits if h.entity_type in _AADHAAR_TYPES]
         assert len(aadhaar) >= 1
+
+    def test_unverified_checksum_is_candidate(self):
+        hits = run_regex_detection("Aadhaar: 1234 5678 9012")
+        candidate = [h for h in hits if h.entity_type == "AADHAAR_FORMAT"]
+        assert len(candidate) == 1
+        assert not [h for h in hits if h.entity_type == "AADHAAR"]
 
 
 class TestPANDetection:

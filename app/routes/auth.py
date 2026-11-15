@@ -1,14 +1,16 @@
 # ============================================================
 # app/routes/auth.py — Authentication endpoints
 # ============================================================
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from datetime import datetime, timezone
 from bson import ObjectId
 from app.database import get_db
 from app.models.schemas import RegisterRequest, LoginRequest, TokenResponse, UserOut
 from app.security.authentication import (
-    hash_password, verify_password, create_access_token, get_current_user
+    hash_password, verify_password, create_access_token, get_current_user,
+    decode_token, revoke_token, oauth2_scheme,
 )
+from app.services import login_throttle
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -55,11 +57,23 @@ async def register(payload: RegisterRequest):
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(payload: LoginRequest):
+async def login(payload: LoginRequest, request: Request):
     db = get_db()
+    client_ip = request.client.host if request.client else "unknown"
+    throttle_key = login_throttle.attempt_key(payload.email, client_ip)
+
+    locked = login_throttle.lock_seconds(throttle_key)
+    if locked:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many failed login attempts. Try again in {locked} seconds.",
+            headers={"Retry-After": str(locked)},
+        )
+
     user = db.users.find_one({"email": payload.email.lower()})
 
     if not user or not verify_password(payload.password, user["password_hash"]):
+        login_throttle.record_failure(throttle_key)
         # Log failed attempt
         db.audit_logs.insert_one({
             "user_id":   None,
@@ -73,6 +87,7 @@ async def login(payload: LoginRequest):
             detail="Incorrect email or password."
         )
 
+    login_throttle.clear(throttle_key)
     token = create_access_token({"sub": str(user["_id"])})
 
     # Audit log
@@ -89,6 +104,22 @@ async def login(payload: LoginRequest):
         name=user["name"],
         role=user.get("role", "user"),
     )
+
+
+@router.post("/logout")
+async def logout(
+    token: str = Depends(oauth2_scheme),
+    current_user: dict = Depends(get_current_user),
+):
+    payload = decode_token(token)
+    revoke_token(payload, user_id=current_user["_id"])
+    get_db().audit_logs.insert_one({
+        "user_id":   current_user["_id"],
+        "action":    "logout",
+        "status":    "success",
+        "timestamp": datetime.now(timezone.utc),
+    })
+    return {"message": "Signed out successfully."}
 
 
 @router.get("/me", response_model=UserOut)

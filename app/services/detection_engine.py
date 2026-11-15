@@ -1,19 +1,28 @@
 # ============================================================
 # app/services/detection_engine.py
-# Regex + spaCy NLP sensitive-data detection
+# Hybrid sensitive-data detection engine:
+#   1. rule layer  — validated regexes + context-gated extractors
+#                    (app/services/sensitive_rules.py)
+#   2. NER layer   — spaCy en_core_web_sm (+ EntityRuler gazetteer)
+#   3. resolution  — type-priority overlap suppression + dedupe
+#
+# Offsets returned by detect() always address the ORIGINAL input string,
+# because normalisation is mapped back character by character.
 # ============================================================
-import re
 import logging
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
+
+from app.services import sensitive_rules as rules
+from app.services.preprocessing import preprocess_with_offsets
 
 logger = logging.getLogger(__name__)
+
 
 # ── Detection result dataclass ────────────────────────────────
 @dataclass
 class Detection:
     entity_type: str
-    matched_value: str          # raw matched text (to be masked before sending to client)
+    matched_value: str          # raw matched text (masked before sending to client)
     start: int
     end: int
     detection_method: str       # "regex" | "nlp" | "both"
@@ -30,186 +39,291 @@ class Detection:
         }
 
 
-# ── Regex patterns (configurable) ────────────────────────────
-REGEX_PATTERNS: list[dict] = [
-    {
-        "name": "EMAIL",
-        "pattern": r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}",
-        "confidence": 0.97,
-    },
-    {
-        "name": "PHONE_IN",   # Indian 10-digit mobile / with country code
-        "pattern": r"(?:\+91[\s\-]?)?(?:0)?[6-9]\d{9}",
-        "confidence": 0.85,
-    },
-    {
-        "name": "PHONE_GENERIC",
-        "pattern": r"\b(?:\+\d{1,3}[\s\-]?)?(?:\(?\d{2,4}\)?[\s\-]?)?\d{3,4}[\s\-]?\d{4}\b",
-        "confidence": 0.70,
-    },
-    {
-        "name": "AADHAAR",    # 12-digit number, optionally space/dash separated
-        "pattern": r"\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b",
-        "confidence": 0.75,
-        "note": "Pattern match only — does not verify Aadhaar validity.",
-    },
-    {
-        "name": "PAN",        # Indian PAN: ABCDE1234F
-        "pattern": r"\b[A-Z]{5}[0-9]{4}[A-Z]\b",
-        "confidence": 0.85,
-        "note": "Pattern match only.",
-    },
-    {
-        "name": "IP_ADDRESS",
-        "pattern": r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b",
-        "confidence": 0.92,
-    },
-    {
-        "name": "CREDIT_CARD",
-        "pattern": r"\b(?:4\d{3}|5[1-5]\d{2}|6(?:011|5\d{2})|3[47]\d{2})[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b",
-        "confidence": 0.80,
-    },
-    {
-        "name": "DATE_OF_BIRTH",
-        "pattern": r"\b(?:0?[1-9]|[12]\d|3[01])[\s/\-](?:0?[1-9]|1[0-2])[\s/\-](?:19|20)\d{2}\b",
-        "confidence": 0.70,
-    },
-    {
-        "name": "API_KEY",
-        "pattern": r"(?i)(?:api[_\-]?key|token|secret)[_\-\s]*[:=]\s*['\"]?([A-Za-z0-9\-_]{20,})['\"]?",
-        "confidence": 0.85,
-    },
-    {
-        "name": "PASSWORD",
-        "pattern": r"(?i)(?:password|passwd|pwd)[_\-\s]*[:=]\s*['\"]?(\S{6,})['\"]?",
-        "confidence": 0.80,
-    },
-]
+# ── Overlap resolution ───────────────────────────────────────
+# Lower number wins when two detections overlap.
+ENTITY_PRIORITY: dict[str, int] = {
+    "CREDIT_CARD": 10,
+    "EMPLOYEE_ID": 12,
+    "CUSTOMER_ID": 13,
+    "AADHAAR": 15,
+    "AADHAAR_FORMAT": 16,
+    "ADDRESS": 22,
+    "PASSPORT": 24,
+    "GSTIN": 26,
+    "PAN": 30,
+    "IFSC": 34,
+    "BANK_ACCOUNT": 38,
+    "VOTER_ID": 44,
+    "DRIVERS_LICENSE": 46,
+    "UPI_ID": 50,
+    "EMAIL": 55,
+    "PHONE_IN": 60,
+    "PHONE_GENERIC": 60,
+    "IP_ADDRESS": 62,
+    "DATE_OF_BIRTH": 65,
+    "PIN_CODE": 66,
+    "USERNAME": 68,
+    "FINANCIAL_VALUE": 70,
+    "MEDICAL_CONDITION": 72,
+    "MEDICAL_TREATMENT": 72,
+    "MEDICATION": 72,
+    "BLOOD_GROUP": 72,
+    "PERSON_NAME": 80,
+    "ORGANIZATION": 85,
+    "GEO_POLITICAL": 90,
+    "LOCATION": 90,
+    "FACILITY": 90,
+}
 
-
-def run_regex_detection(text: str) -> list[Detection]:
-    """Run all configured regex patterns against the text."""
-    results: list[Detection] = []
-    for cfg in REGEX_PATTERNS:
-        for m in re.finditer(cfg["pattern"], text):
-            results.append(Detection(
-                entity_type=cfg["name"],
-                matched_value=m.group(0),
-                start=m.start(),
-                end=m.end(),
-                detection_method="regex",
-                confidence=cfg["confidence"],
-            ))
-    return results
-
-
-# ── NLP detection ─────────────────────────────────────────────
-_nlp = None
-_nlp_available = False
-
-
-def _load_nlp():
-    global _nlp, _nlp_available
-    if _nlp is not None:
-        return
-    try:
-        import spacy
-        _nlp = spacy.load("en_core_web_sm")
-        _nlp_available = True
-        logger.info("spaCy model en_core_web_sm loaded.")
-    except OSError:
-        logger.warning(
-            "spaCy model 'en_core_web_sm' not found. "
-            "Run: python -m spacy download en_core_web_sm\n"
-            "NLP detection will be skipped."
-        )
-        _nlp_available = False
-    except ImportError:
-        logger.warning("spaCy not installed. NLP detection disabled.")
-        _nlp_available = False
-
-
-# Map spaCy entity labels to our entity types
-SPACY_ENTITY_MAP: dict[str, str] = {
-    "PERSON":  "PERSON_NAME",
-    "ORG":     "ORGANIZATION",
-    "GPE":     "GEO_POLITICAL",
-    "LOC":     "LOCATION",
-    "FAC":     "FACILITY",
-    "MONEY":   "FINANCIAL_VALUE",
-    "DATE":    "DATE",
+_ENTITY_FAMILY: dict[str, str] = {
+    "PHONE_IN": "PHONE",
+    "PHONE_GENERIC": "PHONE",
+    "AADHAAR_FORMAT": "AADHAAR",
+    "GEO_POLITICAL": "LOCATION",
+    "FACILITY": "LOCATION",
 }
 
 
-def run_nlp_detection(text: str) -> list[Detection]:
-    """Run spaCy NER on the text. Returns empty list if spaCy is unavailable."""
-    _load_nlp()
-    if not _nlp_available or _nlp is None:
-        return []
+def _family(entity_type: str) -> str:
+    return _ENTITY_FAMILY.get(entity_type, entity_type)
 
-    # Process in chunks to avoid memory issues with very long documents
-    MAX_CHARS = 100_000
-    if len(text) > MAX_CHARS:
-        text = text[:MAX_CHARS]
 
-    doc = _nlp(text)
-    results = []
-    for ent in doc.ents:
-        mapped = SPACY_ENTITY_MAP.get(ent.label_)
-        if mapped:
-            results.append(Detection(
-                entity_type=mapped,
-                matched_value=ent.text,
-                start=ent.start_char,
-                end=ent.end_char,
-                detection_method="nlp",
-                confidence=0.75,
-            ))
+def _priority(entity_type: str) -> int:
+    return ENTITY_PRIORITY.get(entity_type, 78)
+
+
+def resolve_detections(detections: list[Detection]) -> list[Detection]:
+    """
+    Greedy non-overlapping selection ordered by entity priority, then by
+    span length (longer wins), then by confidence. When a dropped detection
+    came from a different method but the same entity family, the surviving
+    detection is marked "both" so the UI can show the hybrid agreement.
+    """
+    ranked = sorted(
+        detections,
+        key=lambda d: (_priority(d.entity_type), -(d.end - d.start), -d.confidence),
+    )
+    accepted: list[Detection] = []
+    for det in ranked:
+        conflict = next(
+            (a for a in accepted if det.start < a.end and a.start < det.end),
+            None,
+        )
+        if conflict is None:
+            accepted.append(det)
+            continue
+        if (
+            det.detection_method != conflict.detection_method
+            and _family(det.entity_type) == _family(conflict.entity_type)
+        ):
+            conflict.detection_method = "both"
+    return sorted(accepted, key=lambda d: (d.start, d.end))
+
+
+def _map_span(start: int, end: int, offsets: list[int], raw_length: int) -> tuple[int, int] | None:
+    if start < 0 or end <= start or end > len(offsets):
+        return None
+    mapped_start = offsets[start]
+    mapped_end = offsets[end - 1] + 1
+    if mapped_start < 0 or mapped_end <= mapped_start or mapped_end > raw_length:
+        return None
+    return mapped_start, mapped_end
+
+
+# ── Rule layer ───────────────────────────────────────────────
+def run_regex_detection(text: str) -> list[Detection]:
+    """Run the validated rule layer against the given text."""
+    detections = [
+        Detection(
+            entity_type=hit.entity_type,
+            matched_value=hit.value,
+            start=hit.start,
+            end=hit.end,
+            detection_method="regex",
+            confidence=hit.confidence,
+        )
+        for hit in rules.extract_all(text)
+    ]
+    return resolve_detections(detections)
+
+
+# ── NER layer ────────────────────────────────────────────────
+_nlp = None
+_nlp_available = False
+_NLP_CHUNK = 40_000
+_NLP_OVERLAP = 200
+
+
+def _load_nlp() -> None:
+    global _nlp, _nlp_available
+    if _nlp is not None or _nlp_available:
+        return
+    try:
+        import spacy
+
+        nlp = spacy.load("en_core_web_sm")
+        patterns = [{"label": "ORG", "pattern": name} for name in rules.KNOWN_ORGS]
+        existing = nlp.pipe_names
+        if "entity_ruler" not in existing:
+            ruler = nlp.add_pipe(
+                "entity_ruler",
+                before="ner",
+                config={"overwrite_ents": False},
+            )
+            ruler.add_patterns(patterns)
+        _nlp = nlp
+        _nlp_available = True
+        logger.info("spaCy model en_core_web_sm loaded with organisation gazetteer.")
+    except OSError:
+        logger.warning(
+            "spaCy model 'en_core_web_sm' not found. "
+            "Run: python -m spacy download en_core_web_sm — NER layer skipped."
+        )
+        _nlp_available = False
+    except ImportError:
+        logger.warning("spaCy not installed — NER layer skipped.")
+        _nlp_available = False
+
+
+def _iter_chunks(text: str):
+    start = 0
+    length = len(text)
+    while start < length:
+        end = min(length, start + _NLP_CHUNK)
+        if end < length:
+            newline = text.rfind("\n", start, end)
+            if newline > start + _NLP_CHUNK // 2:
+                end = newline + 1
+        yield start, text[start:end]
+        if end >= length:
+            break
+        start = max(end - _NLP_OVERLAP, start + 1)
+
+
+def _ner_detections(text: str) -> list[Detection]:
+    results: list[Detection] = []
+    seen: set[tuple[int, int, str]] = set()
+
+    for base, chunk in _iter_chunks(text):
+        doc = _nlp(chunk)
+        for ent in doc.ents:
+            start = base + ent.start_char
+            end = base + ent.end_char
+            label = ent.label_
+            value = ent.text.strip()
+            if not value:
+                continue
+
+            if ent.label_ in ("GPE", "LOC"):
+                if not rules.location_allowed(text, start, end):
+                    continue
+                entity_type = "LOCATION"
+                confidence = 0.6
+            elif ent.label_ == "PERSON":
+                if "\n" in ent.text:
+                    value = ent.text.split("\n", 1)[0].strip()
+                value = value.strip().lstrip(".,;: ").rstrip(".,;:")
+                if not value:
+                    continue
+                start = text.find(value, start, end)
+                if start == -1 or not rules.looks_like_person_name(value):
+                    continue
+                end = start + len(value)
+                entity_type = "PERSON_NAME"
+                confidence = 0.72
+            elif ent.label_ == "ORG":
+                if "\n" in ent.text:
+                    value = ent.text.split("\n", 1)[0].strip()
+                value = value.rstrip(":").strip()
+                if not value:
+                    continue
+                start = text.find(value, start, end)
+                if start == -1 or not rules.is_org_like(value):
+                    continue
+                end = start + len(value)
+                entity_type = "ORGANIZATION"
+                confidence = 0.7
+            elif ent.label_ == "FAC":
+                entity_type = "FACILITY"
+                confidence = 0.55
+            else:
+                # DATE / MONEY / CARDINAL are too noisy to treat as
+                # sensitive on their own; context rules cover DOB and money.
+                continue
+
+            key = (start, end, entity_type)
+            if key in seen:
+                continue
+            seen.add(key)
+            results.append(
+                Detection(
+                    entity_type=entity_type,
+                    matched_value=value,
+                    start=start,
+                    end=end,
+                    detection_method="nlp",
+                    confidence=confidence,
+                )
+            )
     return results
 
 
-# ── Merge & deduplicate ───────────────────────────────────────
-def merge_detections(regex_hits: list[Detection], nlp_hits: list[Detection]) -> list[Detection]:
-    """
-    Combine regex and NLP detections.
-    - Mark overlapping hits from both methods as "both".
-    - Remove exact duplicates.
-    - Sort by start position.
-    """
-    all_hits = list(regex_hits)
-
-    for nlp in nlp_hits:
-        # Check if this NLP entity overlaps with any regex hit
-        overlapping = [
-            r for r in regex_hits
-            if r.start < nlp.end and nlp.start < r.end
-        ]
-        if overlapping:
-            for r in overlapping:
-                r.detection_method = "both"
-        else:
-            all_hits.append(nlp)
-
-    # Remove fully duplicate spans (same start, end, type)
-    seen: set[tuple] = set()
-    unique = []
-    for d in sorted(all_hits, key=lambda x: x.start):
-        key = (d.start, d.end, d.entity_type)
-        if key not in seen:
-            seen.add(key)
-            unique.append(d)
-
-    return unique
-
-
-# ── Public API ────────────────────────────────────────────────
-def detect(text: str) -> list[Detection]:
-    """Full detection pipeline: regex + NLP, merged."""
-    regex_hits = run_regex_detection(text)
-    nlp_hits   = run_nlp_detection(text)
-    return merge_detections(regex_hits, nlp_hits)
+def run_nlp_detection(text: str) -> list[Detection]:
+    """Run spaCy NER on the given text. Returns [] when spaCy is unavailable."""
+    _load_nlp()
+    if not _nlp_available or _nlp is None:
+        return []
+    return _ner_detections(text)
 
 
 def nlp_is_available() -> bool:
     _load_nlp()
     return _nlp_available
+
+
+# ── Merge (backward-compatible helper) ──────────────────────
+def merge_detections(regex_hits: list[Detection], nlp_hits: list[Detection]) -> list[Detection]:
+    """Combine regex and NLP hits, marking overlaps as 'both'."""
+    all_hits = list(regex_hits)
+    for nlp_hit in nlp_hits:
+        overlapping = [r for r in regex_hits if r.start < nlp_hit.end and nlp_hit.start < r.end]
+        if overlapping:
+            for regex_hit in overlapping:
+                regex_hit.detection_method = "both"
+        else:
+            all_hits.append(nlp_hit)
+
+    seen: set[tuple[int, int, str]] = set()
+    unique: list[Detection] = []
+    for det in sorted(all_hits, key=lambda d: (d.start, d.end)):
+        key = (det.start, det.end, det.entity_type)
+        if key not in seen:
+            seen.add(key)
+            unique.append(det)
+    return unique
+
+
+# ── Public API ────────────────────────────────────────────────
+def detect(text: str) -> list[Detection]:
+    """
+    Full hybrid pipeline. Returned offsets address `text` exactly, so the
+    frontend highlighting and format-preserving sanitisation stay aligned.
+    """
+    if not text:
+        return []
+
+    clean, offsets = preprocess_with_offsets(text)
+
+    rule_hits = run_regex_detection(clean)
+    nlp_hits = run_nlp_detection(clean)
+
+    mapped: list[Detection] = []
+    for det in [*rule_hits, *nlp_hits]:
+        span = _map_span(det.start, det.end, offsets, len(text))
+        if span is None:
+            continue
+        det.start, det.end = span
+        det.matched_value = text[det.start:det.end]
+        mapped.append(det)
+
+    return resolve_detections(mapped)

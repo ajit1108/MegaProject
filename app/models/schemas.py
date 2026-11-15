@@ -88,6 +88,8 @@ class DetectionItem(BaseModel):
     risk_points: float
     detection_method: str       # "regex" | "nlp" | "both"
     confidence: float
+    category: str = "General"
+    page: int = 1
 
 
 # ── Analysis ──────────────────────────────────────────────────
@@ -101,6 +103,8 @@ class AnalysisOut(BaseModel):
     risk_score: float
     risk_level: str
     class_summary: dict
+    category_summary: dict = Field(default_factory=dict)
+    page_count: int = 1
     sanitization_status: str
     created_at: datetime
 
@@ -115,9 +119,13 @@ class AnalysisHistoryItem(BaseModel):
     created_at: datetime
 
 
-# ── Sanitization ──────────────────────────────────────────────
 class SanitizeRequest(BaseModel):
-    mode: str = "redact"   # "redact" | "mask"
+    mode: str = "redact"   # "redact" | "mask" | "remove" | "pseudonymize"
+
+
+class RestoreRequest(BaseModel):
+    # Optional text to restore; defaults to the stored sanitized output.
+    text: Optional[str] = Field(default=None, max_length=200_000)
 
 
 class SanitizedOut(BaseModel):
@@ -129,10 +137,22 @@ class SanitizedOut(BaseModel):
     warning: Optional[str] = None
 
 
+# ── Privacy-aware RAG ─────────────────────────────────────────
+class RagQueryRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2_000)
+    document_ids: List[str] = Field(default_factory=list)
+    conversation_id: Optional[str] = None
+    top_k: int = Field(default=5, ge=1, le=10)
+    debug: bool = False
+
+
 # ── Privacy Gateway ───────────────────────────────────────────
 class GatewayInspectRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=100_000)
     allow_forward: bool = False
+    mode: str = "redact"              # redact | mask | pseudonymize
+    block_high_risk: bool = True
+    inspect_response: Optional[str] = Field(default=None, max_length=100_000)
 
 
 class GatewayInspectResponse(BaseModel):
@@ -143,6 +163,13 @@ class GatewayInspectResponse(BaseModel):
     sanitized_text: str
     permit_forward: bool
     warnings: List[str]
+    blocked: bool = False
+    decision: str = "sanitized_only"
+    mode: str = "redact"
+    class_summary: dict = Field(default_factory=dict)
+    category_summary: dict = Field(default_factory=dict)
+    response_inspection: Optional[dict] = None
+    gateway_id: str = ""
 
 
 # ── Dashboard ─────────────────────────────────────────────────

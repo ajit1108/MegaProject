@@ -46,13 +46,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     try { await api.downloadSanitized(id); toast('Download started.','success'); }
     catch(err){ toast(err.message,'error'); }
   });
+
+  document.getElementById('restore-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('restore-btn');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Restoring…';
+    try {
+      const res = await api.restoreAnalysis(id);
+      document.getElementById('restore-result').classList.remove('hidden');
+      document.getElementById('restored-text').textContent = res.restored_text || '';
+      document.getElementById('restore-meta').textContent =
+        `${res.tokens_restored} token(s) restored from ${res.mapping_entries} encrypted mapping entries.`;
+      toast('Pseudonyms restored.', 'success');
+    } catch(err){ toast(err.message,'error'); }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restore Pseudonyms (owner only)';
+  });
 });
 
 // ── Render ───────────────────────────────────────────────────
 function renderAnalysis(a) {
   document.title = `Analysis — ${a.document_name}`;
   setText('doc-name', a.document_name);
-  setText('doc-meta', `Scanned on ${fmtDate(a.created_at)} · ${a.total_detections} detections`);
+  setText('doc-meta', `Scanned on ${fmtDate(a.created_at)} · ${a.total_detections} detections` +
+    (a.page_count ? ` · ${a.page_count} page${a.page_count > 1 ? 's' : ''}` : ''));
 
   // Risk panel
   const score = a.risk_score || 0;
@@ -106,6 +122,7 @@ function renderAnalysis(a) {
       remaining_detections:  0,
       original_text_preview: a.extracted_text_preview || '',
       warnings:              [],
+      pseudonymized:         a.pseudonymized || a.sanitization_mode === 'pseudonymize',
     }, a);
   }
 }
@@ -143,7 +160,7 @@ function renderDetections(detections) {
   );
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">
       ${detections.length ? 'No results match the selected filters.' : 'No sensitive entities detected.'}</td></tr>`;
     return;
   }
@@ -153,6 +170,8 @@ function renderDetections(detections) {
       <td><span class="badge badge-muted text-mono">${escHtml(d.entity_type)}</span></td>
       <td class="text-mono text-sm">${escHtml(d.matched_value || '***')}</td>
       <td>${clsBadge(d.privacy_class)}</td>
+      <td><span class="text-sm">${escHtml(d.category || 'General')}</span></td>
+      <td><span class="text-sm text-muted">${d.page || 1}</span></td>
       <td><span class="badge badge-primary">${escHtml(d.detection_method)}</span></td>
       <td><span class="text-sm">${((d.confidence||0)*100).toFixed(0)}%</span></td>
       <td class="text-sm text-muted">${escHtml(d.classification_reason||'')}</td>
@@ -175,6 +194,12 @@ async function renderSanitization(res, a) {
   } else {
     warn.classList.add('hidden');
   }
+
+  // Restore is only meaningful for reversible pseudonymization.
+  const restoreBtn = document.getElementById('restore-btn');
+  const isPseudo = res.pseudonymized || (a && (a.pseudonymized || a.sanitization_mode === 'pseudonymize'));
+  if (restoreBtn) restoreBtn.classList.toggle('hidden', !isPseudo);
+  document.getElementById('restore-result')?.classList.add('hidden');
 
   // Update download button label
   const dlBtn = document.getElementById('download-btn');

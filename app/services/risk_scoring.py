@@ -1,9 +1,15 @@
 # ============================================================
 # app/services/risk_scoring.py
 # Documented, deterministic privacy risk scoring (0–100)
+#
+# Contribution of a unique entity value:
+#     class_points × confidence_weight × repetition_weight
+# where confidence_weight = 0.5 + 0.5 × confidence and each further
+# occurrence of the SAME value adds nothing (duplicates never inflate).
 # ============================================================
 from dataclasses import dataclass
 from typing import Any
+
 from app.services.classification import CLASS_RISK_POINTS
 
 # ── Configurable thresholds ───────────────────────────────────
@@ -13,11 +19,11 @@ RISK_THRESHOLDS = {
     "high":   (60, 100),
 }
 
-# Normalization cap: raw score above this maps to 100
+# Normalization cap: raw score at/above this maps to 100
 SCORE_CAP = 50.0
 
-# Penalty for repeated detections of the same type (diminishing returns)
-REPETITION_FACTOR = 0.5   # each subsequent same-type hit contributes 50 % of first
+# Penalty for repeated *distinct* values of the same type (diminishing returns)
+REPETITION_FACTOR = 0.5
 
 
 @dataclass
@@ -31,18 +37,33 @@ class RiskResult:
     explanation: str
 
 
+def _confidence_weight(det: dict[str, Any]) -> float:
+    try:
+        confidence = float(det.get("confidence", 1.0))
+    except (TypeError, ValueError):
+        confidence = 1.0
+    confidence = min(1.0, max(0.0, confidence))
+    return 0.5 + 0.5 * confidence
+
+
+def _dedupe_key(det: dict[str, Any], index: int) -> tuple[str, str]:
+    entity_type = det["entity_type"]
+    value = det.get("matched_value") or det.get("value")
+    if value:
+        return entity_type, "".join(str(value).lower().split())
+    # No value available (e.g. unit tests with synthetic dicts): treat each
+    # entry as distinct, otherwise the caller's data would silently collapse.
+    return entity_type, f"__entry_{index}"
+
+
 def calculate_risk(detections_with_class: list[dict[str, Any]]) -> RiskResult:
     """
     Algorithm:
-    1. For each detection, look up its privacy class risk points.
-    2. Apply diminishing returns for repeated entity types.
-    3. Sum all contributions → raw_score.
-    4. Normalize: score = min(raw_score / SCORE_CAP, 1.0) × 100.
-    5. Round to 1 decimal place and cap at 100.
-
-    Args:
-        detections_with_class: list of dicts, each containing
-            "entity_type", "privacy_class", "risk_points" (pre-calculated)
+    1. Collapse duplicate detections of the same type and value.
+    2. For each unique detection: class_points × confidence_weight.
+    3. Apply diminishing returns per entity type (distinct values only).
+    4. Sum contributions → raw_score.
+    5. Normalize: score = min(raw_score / SCORE_CAP, 1.0) × 100.
     """
     if not detections_with_class:
         return RiskResult(
@@ -54,41 +75,42 @@ def calculate_risk(detections_with_class: list[dict[str, Any]]) -> RiskResult:
     type_counts: dict[str, int] = {}
     class_counts: dict[str, int] = {}
     class_contributions: dict[str, float] = {}
+    type_contributions: dict[str, float] = {}
+    seen: set[tuple[str, str]] = set()
     raw_score = 0.0
+    unique_count = 0
 
-    for det in detections_with_class:
-        etype  = det["entity_type"]
-        pclass = det.get("privacy_class", "Internal")
-        points = CLASS_RISK_POINTS.get(pclass, 1.0)
+    for index, det in enumerate(detections_with_class):
+        key = _dedupe_key(det, index)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_count += 1
 
-        # Diminishing returns for repeated types
-        count = type_counts.get(etype, 0)
-        effective = points * (REPETITION_FACTOR ** count)
-        type_counts[etype] = count + 1
+        entity_type = det["entity_type"]
+        privacy_class = det.get("privacy_class", "Internal")
+        points = CLASS_RISK_POINTS.get(privacy_class, 1.0)
+
+        repetition = type_counts.get(entity_type, 0)
+        effective = points * _confidence_weight(det) * (REPETITION_FACTOR ** repetition)
+        type_counts[entity_type] = repetition + 1
 
         raw_score += effective
-        class_counts[pclass]        = class_counts.get(pclass, 0) + 1
-        class_contributions[pclass] = class_contributions.get(pclass, 0.0) + effective
+        class_counts[privacy_class] = class_counts.get(privacy_class, 0) + 1
+        class_contributions[privacy_class] = class_contributions.get(privacy_class, 0.0) + effective
+        type_contributions[entity_type] = type_contributions.get(entity_type, 0.0) + effective
 
-    # Normalize to 0–100
-    score = min(raw_score / SCORE_CAP, 1.0) * 100.0
-    score = round(score, 1)
-
+    score = round(min(raw_score / SCORE_CAP, 1.0) * 100.0, 1)
     level = _level(score)
-
-    # Top factors (up to 3 most significant entity types by contribution)
-    type_contributions: dict[str, float] = {}
-    for det in detections_with_class:
-        et = det["entity_type"]
-        pc = det.get("privacy_class", "Internal")
-        type_contributions[et] = type_contributions.get(et, 0) + CLASS_RISK_POINTS.get(pc, 1.0)
 
     top_factors = sorted(type_contributions, key=type_contributions.get, reverse=True)[:3]
 
+    duplicates = len(detections_with_class) - unique_count
+    duplicate_note = f" ({duplicates} duplicate detection(s) ignored)" if duplicates else ""
     explanation = (
         f"Score {score}/100 ({level}). "
-        f"{len(detections_with_class)} sensitive entity/entities detected across "
-        f"{len(class_counts)} classification level(s). "
+        f"{unique_count} unique sensitive value(s) across "
+        f"{len(class_counts)} classification level(s){duplicate_note}. "
         f"Top contributors: {', '.join(top_factors) if top_factors else 'none'}."
     )
 

@@ -74,6 +74,10 @@ try:
     from PIL import Image
     print("[OK] pytesseract + Pillow (OCR)")
     try:
+        from app.config import get_settings
+        cmd = get_settings().effective_tesseract_cmd
+        if cmd:
+            pytesseract.pytesseract.tesseract_cmd = cmd
         ver = pytesseract.get_tesseract_version()
         print(f"[OK] Tesseract v{ver}")
     except Exception:

@@ -4,6 +4,7 @@
 # ============================================================
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import uuid
 from jose import JWTError, jwt
 import bcrypt
 from fastapi import Depends, HTTPException, status
@@ -37,9 +38,12 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     settings = get_settings()
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (
+    now = datetime.now(timezone.utc)
+    expire = now + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
+    to_encode.setdefault("iat", now)
+    to_encode.setdefault("jti", uuid.uuid4().hex)
     to_encode["exp"] = expire
     return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
 
@@ -52,9 +56,47 @@ def decode_token(token: str) -> dict:
         raise CREDENTIALS_EXCEPTION
 
 
+def is_token_revoked(payload: dict) -> bool:
+    """A token is revoked when its jti is present in the denylist."""
+    jti = payload.get("jti")
+    if not jti:
+        return False
+    try:
+        return get_db().token_denylist.find_one({"jti": jti}) is not None
+    except Exception:
+        # DB unavailable: signature and expiry are still enforced upstream.
+        return False
+
+
+def revoke_token(payload: dict, user_id=None) -> None:
+    """Add a token's jti to the denylist until its natural expiry."""
+    jti = payload.get("jti")
+    if not jti:
+        return
+    exp = payload.get("exp")
+    if isinstance(exp, (int, float)):
+        expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
+    else:
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            minutes=get_settings().access_token_expire_minutes
+        )
+    get_db().token_denylist.update_one(
+        {"jti": jti},
+        {"$setOnInsert": {
+            "jti": jti,
+            "user_id": user_id,
+            "expires_at": expires_at,
+            "revoked_at": datetime.now(timezone.utc),
+        }},
+        upsert=True,
+    )
+
+
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     """FastAPI dependency — returns the current authenticated user document."""
     payload = decode_token(token)
+    if is_token_revoked(payload):
+        raise CREDENTIALS_EXCEPTION
     user_id: str = payload.get("sub")
     if not user_id:
         raise CREDENTIALS_EXCEPTION

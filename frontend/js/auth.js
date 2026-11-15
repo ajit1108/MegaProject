@@ -48,7 +48,8 @@ function _renderUser(user) {
 }
 
 /** Logout */
-function logout() {
+async function logout() {
+  try { await api.logout(); } catch (e) { /* token may already be expired */ }
   clearToken();
   window.location.href = '/login.html';
 }

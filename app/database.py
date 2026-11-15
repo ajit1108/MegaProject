@@ -57,4 +57,24 @@ def _create_indexes() -> None:
     # audit_logs
     db.audit_logs.create_index([("user_id", ASCENDING)])
     db.audit_logs.create_index([("timestamp", DESCENDING)])
+    # sanitized_documents (one current output per analysis)
+    db.sanitized_documents.create_index(
+        [("analysis_id", ASCENDING), ("user_id", ASCENDING)], unique=True
+    )
+    db.sanitized_documents.create_index([("document_id", ASCENDING)])
+    # pseudonym_maps (encrypted restoration payloads)
+    db.pseudonym_maps.create_index(
+        [("analysis_id", ASCENDING), ("user_id", ASCENDING)], unique=True
+    )
+    # login throttling — rolling window documents expire automatically
+    db.login_attempts.create_index([("last_at", ASCENDING)], expireAfterSeconds=900)
+    # revoked JWTs — removed once the token would have expired anyway
+    db.token_denylist.create_index([("jti", ASCENDING)], unique=True)
+    db.token_denylist.create_index([("expires_at", ASCENDING)], expireAfterSeconds=0)
+    # RAG chunk index and conversations
+    db.rag_chunks.create_index([("user_id", ASCENDING), ("document_id", ASCENDING)])
+    db.rag_chunks.create_index(
+        [("analysis_id", ASCENDING), ("chunk_index", ASCENDING)], unique=True
+    )
+    db.rag_conversations.create_index([("user_id", ASCENDING), ("updated_at", DESCENDING)])
     logger.info("MongoDB indexes created.")

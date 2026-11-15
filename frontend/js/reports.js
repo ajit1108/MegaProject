@@ -16,13 +16,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadReports() {
   try {
-    const data = await api.reportSummary();
+    const [data, activity] = await Promise.all([
+      api.reportSummary(),
+      api.analyticsSummary().catch(() => ({})),
+    ]);
 
     setText('r-total-analyses', data.total_analyses  ?? 0);
     setText('r-total-det',      data.total_detections ?? 0);
     setText('r-high',   (data.risk_distribution||{})['High Risk']   ?? 0);
     setText('r-medium', (data.risk_distribution||{})['Medium Risk'] ?? 0);
     setText('r-low',    (data.risk_distribution||{})['Low Risk']    ?? 0);
+
+    // Activity stats come from real audit/analysis rows.
+    setText('r-sanitized', activity.sanitized_documents ?? 0);
+    setText('r-gateway',   activity.gateway_inspections ?? 0);
+    setText('r-blocked',   activity.gateway_blocked ?? 0);
+    setText('r-rag',       activity.rag_queries ?? 0);
+
+    renderDistribution('cat-breakdown', activity.category_distribution || {}, '#5b8def');
+    renderDistribution('method-breakdown', activity.method_distribution || {}, '#a06cd5');
 
     // Classification breakdown bars
     const cd    = data.class_distribution || {};
@@ -77,6 +89,25 @@ async function loadReports() {
       }
     }
   } catch(err){ toast(err.message,'error'); }
+}
+
+function renderDistribution(elId, dist, color) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const entries = Object.entries(dist).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) {
+    el.innerHTML = '<p class="text-sm text-muted">No data yet.</p>';
+    return;
+  }
+  const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
+  el.innerHTML = entries.map(([label, count]) => {
+    const pct = Math.round((count / total) * 100);
+    return `<div class="flex justify-between items-center mb-8">
+      <span class="text-sm">${escHtml(label)}</span>
+      <span class="text-sm fw-600">${count} (${pct}%)</span>
+    </div>
+    <div class="progress mb-16"><div class="progress-bar" style="width:${pct}%;background:${color}"></div></div>`;
+  }).join('');
 }
 
 function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }

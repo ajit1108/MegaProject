@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     upload_dir: str = "uploads"
     max_upload_size_mb: int = 20
+    cors_origins: str = "*"      # comma-separated origins, e.g. "https://app.example.com"
 
     # Tesseract (optional)
     tesseract_cmd: str = ""
@@ -26,6 +27,16 @@ class Settings(BaseSettings):
     # External AI (disabled by default)
     openai_api_key: str = ""
     external_ai_enabled: bool = False
+    llm_base_url: str = "https://api.openai.com/v1"
+    llm_model: str = "gpt-4o-mini"
+
+    # RAG embeddings. "feature-hash" is the local default (no torch).
+    # Set "sentence-transformers" only when that package is installed.
+    rag_embedding_backend: str = "feature-hash"
+    rag_embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
+
+    # Pseudonymization (falls back to secret_key when unset)
+    pseudonym_key: str = ""
 
     class Config:
         env_file = ".env"
@@ -47,6 +58,15 @@ class Settings(BaseSettings):
             if c and os.path.isfile(c):
                 return c
         return self.tesseract_cmd or ""
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        origins = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        return origins or ["*"]
+
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.lower() in ("production", "prod")
 
     @property
     def max_upload_size_bytes(self) -> int:

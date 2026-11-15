@@ -54,17 +54,24 @@ This system detects sensitive information in uploaded documents before they are 
 | Text Preprocessing | ✅ Complete |
 | Regex Detection (Email/Phone/Aadhaar/PAN/IP/Card/API keys) | ✅ Complete |
 | NLP Named-Entity Recognition (spaCy) | ✅ Complete (optional) |
+| Label-independent detection (no keywords required) | ✅ Complete |
 | Privacy Classification (4 levels) | ✅ Complete |
+| Data Categories (10 classes) | ✅ Complete |
 | Privacy Risk Scoring (0–100) | ✅ Complete |
-| Data Sanitization (redact & mask modes) | ✅ Complete |
+| PDF page references per detection | ✅ Complete |
+| Data Sanitization (redact / mask / remove / pseudonymize) | ✅ Complete |
+| Reversible Pseudonymization & Owner-Only Restore | ✅ Complete |
 | Sanitization Verification Re-scan | ✅ Complete |
 | Sanitized TXT Download | ✅ Complete |
-| Privacy Gateway | ✅ Complete |
-| Reports & Analytics | ✅ Complete |
+| Privacy Gateway (policy block, response inspection) | ✅ Complete |
+| Privacy-aware RAG (citations, page refs, conversations) | ✅ Complete |
+| Reports & Analytics (real DB aggregations) | ✅ Complete |
+| Admin Analytics, Audit & User Listing (RBAC) | ✅ Complete |
+| Logout / JWT Revocation / Login Throttling | ✅ Complete |
 | CSV Export | ✅ Complete |
 | Analysis History | ✅ Complete |
 | Audit Logging | ✅ Complete |
-| Unit Tests | ✅ Complete |
+| Unit Tests | ✅ Complete (251 tests) |
 
 ---
 
@@ -78,7 +85,8 @@ This system detects sensitive information in uploaded documents before they are 
 | NLP | spaCy en_core_web_sm |
 | Document Processing | PyMuPDF, python-docx |
 | OCR | Tesseract, pytesseract, Pillow |
-| Authentication | JWT (python-jose), bcrypt (passlib) |
+| Authentication | JWT (python-jose), bcrypt |
+| Retrieval | Local BM25 over sanitized chunks (optional OpenAI-compatible LLM) |
 
 ---
 
@@ -179,8 +187,14 @@ Edit `.env`:
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DATABASE=sensitive_data_detection
 SECRET_KEY=your-long-random-secret-key-here
+PSEUDONYM_KEY=your-dedicated-pseudonym-key-here
+CORS_ORIGINS=http://127.0.0.1:8000
 TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
 ```
+
+In production (`APP_ENV=production`) the server refuses to start with the
+default `SECRET_KEY`. Keep `EXTERNAL_AI_ENABLED=false` unless you explicitly
+want sanitized context sent to an external LLM.
 
 For **MongoDB Atlas** (cloud):
 ```env
@@ -260,9 +274,17 @@ pytest tests/ --cov=app -v
 ```
 
 ### Test Results (expected)
-All tests pass on a correctly configured system:
-- `test_detection.py` — 20+ tests for detection, classification, risk scoring, sanitization
-- `test_auth.py` — 8 tests for authentication, JWT, and password hashing
+All 251 tests pass on a correctly configured system (MongoDB running):
+- `test_detection.py` — detection, classification, risk scoring, sanitization
+- `test_nlp_engine.py` — hybrid engine, label-independent detection, evaluation
+- `test_categories.py` — 10 data categories and labelled identifiers
+- `test_pages.py` — PDF page spans and per-detection page numbers
+- `test_format_sanitization.py` — format-preserving TXT/PDF/DOCX/image output
+- `test_gateway.py` — policy decisions, blocking, response leakage inspection
+- `test_pseudonymization.py` — tokens, encrypted mapping, restore, isolation
+- `test_rag.py` — chunking, citations, permissions, prompt injection
+- `test_analytics.py` — real DB aggregates, audit scoping, admin RBAC
+- `test_auth.py` / `test_auth_hardening.py` — JWT, logout revocation, throttling, roles
 
 > **Note:** `test_auth.py` integration tests that hit the database require MongoDB to be running. Detection/classification/scoring/sanitization tests are fully local (no DB required).
 
@@ -278,6 +300,7 @@ Key endpoints:
 |--------|----------|-------------|
 | POST | /api/auth/register | Register new account |
 | POST | /api/auth/login | Login, get JWT token |
+| POST | /api/auth/logout | Revoke the current token |
 | GET  | /api/auth/me | Get current user |
 | GET  | /api/dashboard/stats | Dashboard statistics |
 | POST | /api/documents/upload | Upload document |
@@ -286,12 +309,24 @@ Key endpoints:
 | POST | /api/analysis/analyze/{doc_id} | Run analysis |
 | GET  | /api/analysis/{id} | Get analysis results |
 | GET  | /api/analysis/history | Analysis history |
-| POST | /api/analysis/{id}/sanitize | Sanitize document |
-| GET  | /api/analysis/{id}/sanitized-download | Download sanitized TXT |
-| POST | /api/privacy-gateway/inspect | Gateway inspection |
+| POST | /api/analysis/{id}/sanitize?mode=redact\|mask\|remove\|pseudonymize | Sanitize document |
+| POST | /api/analysis/{id}/restore | Restore pseudonymized text (owner only) |
+| GET  | /api/analysis/{id}/sanitized-download | Download sanitized file |
+| POST | /api/privacy-gateway/inspect | Gateway inspection, policy decision, response inspection |
+| POST | /api/rag/index/{analysis_id} | Re-index an analysis for Q&A |
+| POST | /api/rag/query | Ask a question over your indexed documents |
+| GET  | /api/rag/conversations | List your conversations |
+| GET  | /api/rag/conversations/{id} | Read a conversation |
+| DELETE | /api/rag/conversations/{id} | Delete a conversation |
+| GET  | /api/rag/stats | Indexing statistics |
+| GET  | /api/analytics/summary | Your real analytics summary |
+| GET  | /api/analytics/audit | Your audit events |
+| GET  | /api/admin/analytics | Global analytics (admin only) |
+| GET  | /api/admin/audit | Global audit feed (admin only) |
+| GET  | /api/admin/users | User listing without password hashes (admin only) |
 | GET  | /api/reports/summary | Report summary |
 | GET  | /api/reports/export | CSV export |
-| GET  | /api/health | System health check |
+| GET  | /api/health | System health check (includes database status) |
 
 ---
 
@@ -414,10 +449,13 @@ score = round(score, 1)
 
 1. **NLP detection is probabilistic** — spaCy en_core_web_sm may miss entities or produce false positives. Combined with regex for better coverage.
 2. **OCR quality depends on image clarity** — low-resolution or handwritten documents may not extract well.
-3. **Aadhaar / PAN patterns** are structural matches only. Validity is not verified.
+3. **Aadhaar / PAN patterns** are structural matches only. An unverified Aadhaar remains an `AADHAAR_FORMAT` candidate, never a confirmed identifier.
 4. **Sanitization is not a legal guarantee** — the system applies configured detection patterns. Novel or unusual sensitive data formats may not be detected.
 5. **Password-protected PDFs** are not supported.
-6. **No external AI integration** by default — the Privacy Gateway runs entirely locally.
+6. **No external AI integration** by default — retrieval and answering run locally. When `EXTERNAL_AI_ENABLED=true`, only sanitized context is sent to the configured provider.
+7. **Pseudonymized images** receive visual redaction; pseudonym tokens apply to extracted text only.
+8. **Gateway pseudonyms are ephemeral** — they are not stored in a restore mapping.
+9. **RAG retrieval uses local BM25**, not a heavyweight embedding model; answers fall back to extractive citation-grounded output unless an external LLM is enabled.
 
 ---
 

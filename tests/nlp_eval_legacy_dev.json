@@ -1,0 +1,2395 @@
+{
+  "documents": 24,
+  "gold_spans": 68,
+  "predicted_spans": 102,
+  "strict": {
+    "tp": 30,
+    "fp": 72,
+    "fn": 38,
+    "precision": 0.2941,
+    "recall": 0.4412,
+    "f1": 0.3529,
+    "per_type": {
+      "EMAIL": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "ORGANIZATION": {
+        "tp": 4,
+        "fp": 18,
+        "fn": 4,
+        "precision": 0.1818,
+        "recall": 0.5,
+        "f1": 0.2667
+      },
+      "PERSON_NAME": {
+        "tp": 4,
+        "fp": 11,
+        "fn": 6,
+        "precision": 0.2667,
+        "recall": 0.4,
+        "f1": 0.32
+      },
+      "CREDIT_CARD": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "AADHAAR": {
+        "tp": 4,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.5714,
+        "recall": 1.0,
+        "f1": 0.7273
+      },
+      "PHONE": {
+        "tp": 5,
+        "fp": 14,
+        "fn": 5,
+        "precision": 0.2632,
+        "recall": 0.5,
+        "f1": 0.3448
+      },
+      "IP_ADDRESS": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.6667,
+        "recall": 1.0,
+        "f1": 0.8
+      },
+      "DATE_OF_BIRTH": {
+        "tp": 3,
+        "fp": 18,
+        "fn": 0,
+        "precision": 0.1429,
+        "recall": 1.0,
+        "f1": 0.25
+      },
+      "PAN": {
+        "tp": 3,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571
+      },
+      "LOCATION": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FACILITY": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "ADDRESS": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "PASSPORT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "BANK_ACCOUNT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "IFSC": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_CONDITION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICATION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "BLOOD_GROUP": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FINANCIAL_VALUE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "GSTIN": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "VOTER_ID": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "DRIVERS_LICENSE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "UPI_ID": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "USERNAME": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_TREATMENT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "PIN_CODE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "false_positives": [
+      {
+        "entity_type": "DATE",
+        "matched_value": "98765 43210",
+        "start": 82,
+        "end": 93,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Sunrise Apartments",
+        "start": 112,
+        "end": 130,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "GEO_POLITICAL",
+        "matched_value": "MG Road",
+        "start": 132,
+        "end": 139,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "411001",
+        "start": 159,
+        "end": 165,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "PAN",
+        "start": 192,
+        "end": 195,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "2345 6789 0124",
+        "start": 217,
+        "end": 231,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "annual",
+        "start": 84,
+        "end": 90,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Megacorp Technologies Pvt Ltd\nDirect",
+        "start": 149,
+        "end": 185,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "9822011223",
+        "start": 209,
+        "end": 219,
+        "detection_method": "regex",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Unique Identification Authority of India\nAadhaar No",
+        "start": 0,
+        "end": 51,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "9876 5432 1012",
+        "start": 53,
+        "end": 67,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "PAN",
+        "start": 22,
+        "end": 25,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Bank",
+        "start": 0,
+        "end": 4,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "1234567890123",
+        "start": 84,
+        "end": 97,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Bank: HDFC Bank",
+        "start": 121,
+        "end": 136,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Kothrud",
+        "start": 145,
+        "end": 152,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "4111 1111 1111",
+        "start": 44,
+        "end": 58,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "AADHAAR",
+        "matched_value": "4111 1111 1111",
+        "start": 44,
+        "end": 58,
+        "detection_method": "both",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Billing Address",
+        "start": 78,
+        "end": 93,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "FACILITY",
+        "matched_value": "Baker Street",
+        "start": 98,
+        "end": 110,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "GEO_POLITICAL",
+        "matched_value": "London",
+        "start": 112,
+        "end": 118,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "020) 2456 7890",
+        "start": 23,
+        "end": 37,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "98765-43210",
+        "start": 77,
+        "end": 88,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "415) 555-0132",
+        "start": 114,
+        "end": 127,
+        "detection_method": "regex",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "matched_value": "01/04/2021",
+        "start": 56,
+        "end": 66,
+        "detection_method": "regex",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Meera Joshi\nAge",
+        "start": 14,
+        "end": 29,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Blood Group",
+        "start": 113,
+        "end": 124,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "Annual",
+        "start": 13,
+        "end": 19,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "INR",
+        "start": 25,
+        "end": 28,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "Monthly",
+        "start": 39,
+        "end": 46,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "the 1st of every month",
+        "start": 78,
+        "end": 100,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Green Park Society",
+        "start": 26,
+        "end": 44,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "GEO_POLITICAL",
+        "matched_value": "Mumbai",
+        "start": 59,
+        "end": 65,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "400053",
+        "start": 78,
+        "end": 84,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "GSTIN",
+        "start": 0,
+        "end": 5,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "20150012345",
+        "start": 66,
+        "end": 77,
+        "detection_method": "regex",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "ajit_b95\n",
+        "start": 121,
+        "end": 130,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Client IP",
+        "start": 11,
+        "end": 20,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "IP_ADDRESS",
+        "matched_value": "1.2.3.4",
+        "start": 78,
+        "end": 85,
+        "detection_method": "regex",
+        "confidence": 0.92
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "Quarterly",
+        "start": 0,
+        "end": 9,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      }
+    ],
+    "false_negatives": [
+      {
+        "entity_type": "PHONE_IN",
+        "matched_value": "+91 98765 43210",
+        "start": 78,
+        "end": 93
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "Flat 4B, Sunrise Apartments, MG Road, Pune, Maharashtra 411001",
+        "start": 103,
+        "end": 165
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Megacorp Technologies Pvt Ltd",
+        "start": 149,
+        "end": 178
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Unique Identification Authority of India",
+        "start": 0,
+        "end": 40
+      },
+      {
+        "entity_type": "PASSPORT",
+        "matched_value": "M1234567",
+        "start": 51,
+        "end": 59
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Suresh Patil",
+        "start": 55,
+        "end": 67
+      },
+      {
+        "entity_type": "BANK_ACCOUNT",
+        "matched_value": "1234567890123",
+        "start": 84,
+        "end": 97
+      },
+      {
+        "entity_type": "IFSC",
+        "matched_value": "HDFC0001234",
+        "start": 109,
+        "end": 120
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "HDFC Bank",
+        "start": 127,
+        "end": 136
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "22 Baker Street, London NW1 6XE",
+        "start": 95,
+        "end": 126
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "(020) 2456 7890",
+        "start": 22,
+        "end": 37
+      },
+      {
+        "entity_type": "PHONE_IN",
+        "matched_value": "+91-98765-43210",
+        "start": 73,
+        "end": 88
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "+1 (415) 555-0132",
+        "start": 110,
+        "end": 127
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Meera Joshi",
+        "start": 14,
+        "end": 25
+      },
+      {
+        "entity_type": "MEDICAL_CONDITION",
+        "matched_value": "Type 2 Diabetes Mellitus",
+        "start": 45,
+        "end": 69
+      },
+      {
+        "entity_type": "MEDICATION",
+        "matched_value": "Metformin",
+        "start": 84,
+        "end": 93
+      },
+      {
+        "entity_type": "BLOOD_GROUP",
+        "matched_value": "O+",
+        "start": 126,
+        "end": 128
+      },
+      {
+        "entity_type": "MEDICATION",
+        "matched_value": "Penicillin",
+        "start": 140,
+        "end": 150
+      },
+      {
+        "entity_type": "FINANCIAL_VALUE",
+        "matched_value": "INR 12,50,000",
+        "start": 25,
+        "end": 38
+      },
+      {
+        "entity_type": "FINANCIAL_VALUE",
+        "matched_value": "45000",
+        "start": 57,
+        "end": 62
+      },
+      {
+        "entity_type": "FINANCIAL_VALUE",
+        "matched_value": "45678.00",
+        "start": 123,
+        "end": 131
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "Flat 7, Green Park Society\nAndheri West, Mumbai\nMaharashtra 400053",
+        "start": 18,
+        "end": 84
+      },
+      {
+        "entity_type": "GSTIN",
+        "matched_value": "27AAPFU0939F1ZV",
+        "start": 7,
+        "end": 22
+      },
+      {
+        "entity_type": "VOTER_ID",
+        "matched_value": "ABC1234567",
+        "start": 33,
+        "end": 43
+      },
+      {
+        "entity_type": "DRIVERS_LICENSE",
+        "matched_value": "MH12 20150012345",
+        "start": 61,
+        "end": 77
+      },
+      {
+        "entity_type": "UPI_ID",
+        "matched_value": "ajit.birajdar@okhdfcbank",
+        "start": 86,
+        "end": 110
+      },
+      {
+        "entity_type": "USERNAME",
+        "matched_value": "ajit_b95",
+        "start": 121,
+        "end": 129
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Shrikant Gopalrao Deshmukh",
+        "start": 62,
+        "end": 88
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Vikram Singh Rathore",
+        "start": 35,
+        "end": 55
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Mahendra Singh Rathore",
+        "start": 71,
+        "end": 93
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "101, Lake View Residency, Baner Road, Pune 411045",
+        "start": 208,
+        "end": 257
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Kavita Rane",
+        "start": 32,
+        "end": 43
+      },
+      {
+        "entity_type": "MEDICAL_CONDITION",
+        "matched_value": "Breast Cancer",
+        "start": 72,
+        "end": 85
+      },
+      {
+        "entity_type": "MEDICAL_TREATMENT",
+        "matched_value": "Chemotherapy",
+        "start": 55,
+        "end": 67
+      },
+      {
+        "entity_type": "FINANCIAL_VALUE",
+        "matched_value": "Rs. 2,50,000",
+        "start": 100,
+        "end": 112
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Ruby Hall Clinic",
+        "start": 123,
+        "end": 139
+      },
+      {
+        "entity_type": "PIN_CODE",
+        "matched_value": "500034",
+        "start": 92,
+        "end": 98
+      },
+      {
+        "entity_type": "PHONE_IN",
+        "matched_value": "+91 90000 00001",
+        "start": 42,
+        "end": 57
+      }
+    ]
+  },
+  "relaxed": {
+    "tp": 41,
+    "fp": 61,
+    "fn": 27,
+    "precision": 0.402,
+    "recall": 0.6029,
+    "f1": 0.4824,
+    "per_type": {
+      "ORGANIZATION": {
+        "tp": 7,
+        "fp": 15,
+        "fn": 1,
+        "precision": 0.3182,
+        "recall": 0.875,
+        "f1": 0.4667
+      },
+      "EMAIL": {
+        "tp": 4,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "PERSON_NAME": {
+        "tp": 8,
+        "fp": 7,
+        "fn": 2,
+        "precision": 0.5333,
+        "recall": 0.8,
+        "f1": 0.64
+      },
+      "CREDIT_CARD": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "PHONE": {
+        "tp": 9,
+        "fp": 10,
+        "fn": 1,
+        "precision": 0.4737,
+        "recall": 0.9,
+        "f1": 0.6207
+      },
+      "AADHAAR": {
+        "tp": 4,
+        "fp": 3,
+        "fn": 0,
+        "precision": 0.5714,
+        "recall": 1.0,
+        "f1": 0.7273
+      },
+      "IP_ADDRESS": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.6667,
+        "recall": 1.0,
+        "f1": 0.8
+      },
+      "DATE_OF_BIRTH": {
+        "tp": 3,
+        "fp": 18,
+        "fn": 0,
+        "precision": 0.1429,
+        "recall": 1.0,
+        "f1": 0.25
+      },
+      "PAN": {
+        "tp": 3,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1": 0.8571
+      },
+      "LOCATION": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FACILITY": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "ADDRESS": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "PASSPORT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "BANK_ACCOUNT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "IFSC": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_CONDITION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICATION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "BLOOD_GROUP": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FINANCIAL_VALUE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "GSTIN": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "VOTER_ID": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "DRIVERS_LICENSE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "UPI_ID": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "USERNAME": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_TREATMENT": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "PIN_CODE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    }
+  },
+  "per_document": [
+    {
+      "id": "resume_01",
+      "gold": 7,
+      "predicted": 11,
+      "strict": {
+        "tp": 5,
+        "fp": 6,
+        "fn": 2,
+        "precision": 0.4545,
+        "recall": 0.7143,
+        "f1": 0.5556
+      },
+      "relaxed": {
+        "tp": 5,
+        "fp": 6,
+        "fn": 2,
+        "precision": 0.4545,
+        "recall": 0.7143,
+        "f1": 0.5556
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "98765 43210",
+          "start": 82,
+          "end": 93,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Sunrise Apartments",
+          "start": 112,
+          "end": 130,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "MG Road",
+          "start": 132,
+          "end": 139,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "411001",
+          "start": 159,
+          "end": 165,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "PAN",
+          "start": 192,
+          "end": 195,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "2345 6789 0124",
+          "start": 217,
+          "end": 231,
+          "detection_method": "both",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PHONE_IN",
+          "matched_value": "+91 98765 43210",
+          "start": 78,
+          "end": 93
+        },
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "Flat 4B, Sunrise Apartments, MG Road, Pune, Maharashtra 411001",
+          "start": 103,
+          "end": 165
+        }
+      ]
+    },
+    {
+      "id": "email_signature_02",
+      "gold": 5,
+      "predicted": 7,
+      "strict": {
+        "tp": 4,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.5714,
+        "recall": 0.8,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 5,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.7143,
+        "recall": 1.0,
+        "f1": 0.8333
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "annual",
+          "start": 84,
+          "end": 90,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Megacorp Technologies Pvt Ltd\nDirect",
+          "start": 149,
+          "end": 185,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "9822011223",
+          "start": 209,
+          "end": 219,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Megacorp Technologies Pvt Ltd",
+          "start": 149,
+          "end": 178
+        }
+      ]
+    },
+    {
+      "id": "aadhaar_letter_03",
+      "gold": 2,
+      "predicted": 3,
+      "strict": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.3333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      "relaxed": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.6667,
+        "recall": 1.0,
+        "f1": 0.8
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Unique Identification Authority of India\nAadhaar No",
+          "start": 0,
+          "end": 51,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "9876 5432 1012",
+          "start": 53,
+          "end": 67,
+          "detection_method": "both",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Unique Identification Authority of India",
+          "start": 0,
+          "end": 40
+        }
+      ]
+    },
+    {
+      "id": "tax_passport_04",
+      "gold": 3,
+      "predicted": 3,
+      "strict": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.6667,
+        "recall": 0.6667,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.6667,
+        "recall": 0.6667,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "PAN",
+          "start": 22,
+          "end": 25,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PASSPORT",
+          "matched_value": "M1234567",
+          "start": 51,
+          "end": 59
+        }
+      ]
+    },
+    {
+      "id": "bank_details_05",
+      "gold": 4,
+      "predicted": 4,
+      "strict": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.25,
+        "recall": 0.25,
+        "f1": 0.25
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Bank",
+          "start": 0,
+          "end": 4,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "1234567890123",
+          "start": 84,
+          "end": 97,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Bank: HDFC Bank",
+          "start": 121,
+          "end": 136,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Kothrud",
+          "start": 145,
+          "end": 152,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Suresh Patil",
+          "start": 55,
+          "end": 67
+        },
+        {
+          "entity_type": "BANK_ACCOUNT",
+          "matched_value": "1234567890123",
+          "start": 84,
+          "end": 97
+        },
+        {
+          "entity_type": "IFSC",
+          "matched_value": "HDFC0001234",
+          "start": 109,
+          "end": 120
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "HDFC Bank",
+          "start": 127,
+          "end": 136
+        }
+      ]
+    },
+    {
+      "id": "card_06",
+      "gold": 2,
+      "predicted": 6,
+      "strict": {
+        "tp": 1,
+        "fp": 5,
+        "fn": 1,
+        "precision": 0.1667,
+        "recall": 0.5,
+        "f1": 0.25
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 5,
+        "fn": 1,
+        "precision": 0.1667,
+        "recall": 0.5,
+        "f1": 0.25
+      },
+      "false_positives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "4111 1111 1111",
+          "start": 44,
+          "end": 58,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "AADHAAR",
+          "matched_value": "4111 1111 1111",
+          "start": 44,
+          "end": 58,
+          "detection_method": "both",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Billing Address",
+          "start": 78,
+          "end": 93,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "FACILITY",
+          "matched_value": "Baker Street",
+          "start": 98,
+          "end": 110,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "London",
+          "start": 112,
+          "end": 118,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "22 Baker Street, London NW1 6XE",
+          "start": 95,
+          "end": 126
+        }
+      ]
+    },
+    {
+      "id": "phones_07",
+      "gold": 4,
+      "predicted": 4,
+      "strict": {
+        "tp": 1,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.25,
+        "recall": 0.25,
+        "f1": 0.25
+      },
+      "relaxed": {
+        "tp": 3,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.75,
+        "recall": 0.75,
+        "f1": 0.75
+      },
+      "false_positives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "020) 2456 7890",
+          "start": 23,
+          "end": 37,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "98765-43210",
+          "start": 77,
+          "end": 88,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "415) 555-0132",
+          "start": 114,
+          "end": 127,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "(020) 2456 7890",
+          "start": 22,
+          "end": 37
+        },
+        {
+          "entity_type": "PHONE_IN",
+          "matched_value": "+91-98765-43210",
+          "start": 73,
+          "end": 88
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "+1 (415) 555-0132",
+          "start": 110,
+          "end": 127
+        }
+      ]
+    },
+    {
+      "id": "dob_08",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE_OF_BIRTH",
+          "matched_value": "01/04/2021",
+          "start": 56,
+          "end": 66,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "medical_09",
+      "gold": 5,
+      "predicted": 2,
+      "strict": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 4,
+        "precision": 0.5,
+        "recall": 0.2,
+        "f1": 0.2857
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Meera Joshi\nAge",
+          "start": 14,
+          "end": 29,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Blood Group",
+          "start": 113,
+          "end": 124,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Meera Joshi",
+          "start": 14,
+          "end": 25
+        },
+        {
+          "entity_type": "MEDICAL_CONDITION",
+          "matched_value": "Type 2 Diabetes Mellitus",
+          "start": 45,
+          "end": 69
+        },
+        {
+          "entity_type": "MEDICATION",
+          "matched_value": "Metformin",
+          "start": 84,
+          "end": 93
+        },
+        {
+          "entity_type": "BLOOD_GROUP",
+          "matched_value": "O+",
+          "start": 126,
+          "end": 128
+        },
+        {
+          "entity_type": "MEDICATION",
+          "matched_value": "Penicillin",
+          "start": 140,
+          "end": 150
+        }
+      ]
+    },
+    {
+      "id": "salary_10",
+      "gold": 3,
+      "predicted": 4,
+      "strict": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "Annual",
+          "start": 13,
+          "end": 19,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "INR",
+          "start": 25,
+          "end": 28,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "Monthly",
+          "start": 39,
+          "end": 46,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "the 1st of every month",
+          "start": 78,
+          "end": 100,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "FINANCIAL_VALUE",
+          "matched_value": "INR 12,50,000",
+          "start": 25,
+          "end": 38
+        },
+        {
+          "entity_type": "FINANCIAL_VALUE",
+          "matched_value": "45000",
+          "start": 57,
+          "end": 62
+        },
+        {
+          "entity_type": "FINANCIAL_VALUE",
+          "matched_value": "45678.00",
+          "start": 123,
+          "end": 131
+        }
+      ]
+    },
+    {
+      "id": "address_11",
+      "gold": 1,
+      "predicted": 3,
+      "strict": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Green Park Society",
+          "start": 26,
+          "end": 44,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "Mumbai",
+          "start": 59,
+          "end": 65,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "400053",
+          "start": 78,
+          "end": 84,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "Flat 7, Green Park Society\nAndheri West, Mumbai\nMaharashtra 400053",
+          "start": 18,
+          "end": 84
+        }
+      ]
+    },
+    {
+      "id": "ids_12",
+      "gold": 5,
+      "predicted": 3,
+      "strict": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "GSTIN",
+          "start": 0,
+          "end": 5,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "20150012345",
+          "start": 66,
+          "end": 77,
+          "detection_method": "regex",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "ajit_b95\n",
+          "start": 121,
+          "end": 130,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "GSTIN",
+          "matched_value": "27AAPFU0939F1ZV",
+          "start": 7,
+          "end": 22
+        },
+        {
+          "entity_type": "VOTER_ID",
+          "matched_value": "ABC1234567",
+          "start": 33,
+          "end": 43
+        },
+        {
+          "entity_type": "DRIVERS_LICENSE",
+          "matched_value": "MH12 20150012345",
+          "start": 61,
+          "end": 77
+        },
+        {
+          "entity_type": "UPI_ID",
+          "matched_value": "ajit.birajdar@okhdfcbank",
+          "start": 86,
+          "end": 110
+        },
+        {
+          "entity_type": "USERNAME",
+          "matched_value": "ajit_b95",
+          "start": 121,
+          "end": 129
+        }
+      ]
+    },
+    {
+      "id": "ip_log_13",
+      "gold": 2,
+      "predicted": 4,
+      "strict": {
+        "tp": 2,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 2,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Client IP",
+          "start": 11,
+          "end": 20,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "IP_ADDRESS",
+          "matched_value": "1.2.3.4",
+          "start": 78,
+          "end": 85,
+          "detection_method": "regex",
+          "confidence": 0.92
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "negative_numbers_14",
+      "gold": 0,
+      "predicted": 8,
+      "strict": {
+        "tp": 0,
+        "fp": 8,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 8,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "Quarterly",
+          "start": 0,
+          "end": 9,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "The year 2024",
+          "start": 68,
+          "end": 81,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "366 days",
+          "start": 86,
+          "end": 94,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "889900",
+          "start": 114,
+          "end": 120,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "4567",
+          "start": 137,
+          "end": 141,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Order",
+          "start": 143,
+          "end": 148,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "1234 5678 9012",
+          "start": 156,
+          "end": 170,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "AADHAAR",
+          "matched_value": "1234 5678 9012",
+          "start": 156,
+          "end": 170,
+          "detection_method": "both",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "names_15",
+      "gold": 3,
+      "predicted": 3,
+      "strict": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.6667,
+        "recall": 0.6667,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.6667,
+        "recall": 0.6667,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Shrikant Gopalrao Deshmukh",
+          "start": 62,
+          "end": 88,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Shrikant Gopalrao Deshmukh",
+          "start": 62,
+          "end": 88
+        }
+      ]
+    },
+    {
+      "id": "orgs_16",
+      "gold": 3,
+      "predicted": 3,
+      "strict": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "negative_placeholder_17",
+      "gold": 0,
+      "predicted": 4,
+      "strict": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "PAN",
+          "start": 4,
+          "end": 7,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PAN",
+          "matched_value": "AAAAA9999A",
+          "start": 18,
+          "end": 28,
+          "detection_method": "both",
+          "confidence": 0.85
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "0000 0000 0000",
+          "start": 85,
+          "end": 99,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "AADHAAR",
+          "matched_value": "0000 0000 0000",
+          "start": 85,
+          "end": 99,
+          "detection_method": "both",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "kyc_mixed_18",
+      "gold": 8,
+      "predicted": 15,
+      "strict": {
+        "tp": 5,
+        "fp": 10,
+        "fn": 3,
+        "precision": 0.3333,
+        "recall": 0.625,
+        "f1": 0.4348
+      },
+      "relaxed": {
+        "tp": 7,
+        "fp": 8,
+        "fn": 1,
+        "precision": 0.4667,
+        "recall": 0.875,
+        "f1": 0.6087
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "CONFIDENTIAL - KYC",
+          "start": 0,
+          "end": 18,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Vikram Singh",
+          "start": 35,
+          "end": 47,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Mahendra Singh",
+          "start": 71,
+          "end": 85,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "9988776655",
+          "start": 118,
+          "end": 128,
+          "detection_method": "regex",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Aadhaar",
+          "start": 159,
+          "end": 166,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "5551 2345 6781",
+          "start": 168,
+          "end": 182,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "PAN",
+          "start": 183,
+          "end": 186,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "FACILITY",
+          "matched_value": "Lake View Residency",
+          "start": 213,
+          "end": 232,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Baner Road",
+          "start": 234,
+          "end": 244,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "Pune 411045",
+          "start": 246,
+          "end": 257,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Vikram Singh Rathore",
+          "start": 35,
+          "end": 55
+        },
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Mahendra Singh Rathore",
+          "start": 71,
+          "end": 93
+        },
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "101, Lake View Residency, Baner Road, Pune 411045",
+          "start": 208,
+          "end": 257
+        }
+      ]
+    },
+    {
+      "id": "negative_article_19",
+      "gold": 0,
+      "predicted": 0,
+      "strict": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "aadhaar_ungrouped_20",
+      "gold": 2,
+      "predicted": 6,
+      "strict": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "relaxed": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "KYC",
+          "start": 0,
+          "end": 3,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Aadhaar",
+          "start": 19,
+          "end": 26,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "234567890124",
+          "start": 28,
+          "end": 40,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "09876543210",
+          "start": 49,
+          "end": 60,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "medical_insurance_21",
+      "gold": 5,
+      "predicted": 1,
+      "strict": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 4,
+        "precision": 1.0,
+        "recall": 0.2,
+        "f1": 0.3333
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Kavita Rane\nTreatment",
+          "start": 32,
+          "end": 53,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Kavita Rane",
+          "start": 32,
+          "end": 43
+        },
+        {
+          "entity_type": "MEDICAL_CONDITION",
+          "matched_value": "Breast Cancer",
+          "start": 72,
+          "end": 85
+        },
+        {
+          "entity_type": "MEDICAL_TREATMENT",
+          "matched_value": "Chemotherapy",
+          "start": 55,
+          "end": 67
+        },
+        {
+          "entity_type": "FINANCIAL_VALUE",
+          "matched_value": "Rs. 2,50,000",
+          "start": 100,
+          "end": 112
+        },
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Ruby Hall Clinic",
+          "start": 123,
+          "end": 139
+        }
+      ]
+    },
+    {
+      "id": "pincode_22",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Customer KYC\n",
+          "start": 0,
+          "end": 13,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "Banjara Hills",
+          "start": 52,
+          "end": 65,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PIN_CODE",
+          "matched_value": "500034",
+          "start": 92,
+          "end": 98
+        }
+      ]
+    },
+    {
+      "id": "negative_tollfree_23",
+      "gold": 0,
+      "predicted": 1,
+      "strict": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "1800-123-4567",
+          "start": 24,
+          "end": 37,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "uppercase_24",
+      "gold": 2,
+      "predicted": 3,
+      "strict": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.3333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.3333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "90000",
+          "start": 46,
+          "end": 51,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "00001",
+          "start": 52,
+          "end": 57,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PHONE_IN",
+          "matched_value": "+91 90000 00001",
+          "start": 42,
+          "end": 57
+        }
+      ]
+    }
+  ],
+  "label": "legacy_dev",
+  "engine": "legacy",
+  "split": "dev",
+  "generated_at": "2026-11-11T05:45:40.774784+00:00",
+  "nlp_available": true,
+  "elapsed_seconds": 0.6267
+}

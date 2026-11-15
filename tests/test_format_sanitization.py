@@ -107,6 +107,19 @@ def create_test_docx(paragraphs: list[str], table_cells: list[str]) -> bytes:
     return buf.getvalue()
 
 
+def _test_user_token() -> str:
+    """Token for a real user row, creating one when the test DB is empty."""
+    db = get_db()
+    user = db.users.find_one() or db.users.find_one_and_update(
+        {"email": "_format_test@local"},
+        {"$setOnInsert": {"email": "_format_test@local", "role": "user",
+                          "hashed_password": hash_password("TestPass123!")}},
+        upsert=True,
+        return_document=True,
+    )
+    return create_access_token(data={"sub": str(user["_id"])})
+
+
 # ── Test Cases ───────────────────────────────────────────────
 
 class TestFormatPreservingSanitization:
@@ -289,9 +302,7 @@ class TestFormatPreservingSanitization:
 
     def test_case_9_corrupted_image_validation(self):
         """9. Corrupted image upload is rejected with 400 error."""
-        db = get_db()
-        user = db.users.find_one() or {"_id": ObjectId()}
-        token = create_access_token(data={"sub": str(user["_id"])})
+        token = _test_user_token()
 
         corrupted_bytes = b"NOT_A_REAL_PNG_HEADER_DATA_12345"
         resp = client.post(
@@ -318,9 +329,7 @@ class TestFormatPreservingSanitization:
 
     def test_case_11_unsupported_file_extension(self):
         """11. Unsupported file extension is rejected with 400 error."""
-        db = get_db()
-        user = db.users.find_one() or {"_id": ObjectId()}
-        token = create_access_token(data={"sub": str(user["_id"])})
+        token = _test_user_token()
 
         resp = client.post(
             "/api/documents/upload",

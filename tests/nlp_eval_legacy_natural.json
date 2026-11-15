@@ -1,0 +1,1049 @@
+{
+  "documents": 20,
+  "gold_spans": 22,
+  "predicted_spans": 28,
+  "strict": {
+    "tp": 12,
+    "fp": 16,
+    "fn": 10,
+    "precision": 0.4286,
+    "recall": 0.5455,
+    "f1": 0.48,
+    "per_type": {
+      "EMAIL": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "ORGANIZATION": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "AADHAAR": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "PERSON_NAME": {
+        "tp": 4,
+        "fp": 4,
+        "fn": 2,
+        "precision": 0.5,
+        "recall": 0.6667,
+        "f1": 0.5714
+      },
+      "DATE_OF_BIRTH": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "PHONE": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "LOCATION": {
+        "tp": 0,
+        "fp": 3,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "ADDRESS": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_CONDITION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FINANCIAL_VALUE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "false_positives": [
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Kolhapur",
+        "start": 32,
+        "end": 40,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Email",
+        "start": 0,
+        "end": 5,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "9876543210",
+        "start": 19,
+        "end": 29,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "9876543210",
+        "start": 11,
+        "end": 21,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Shivaji Nagar",
+        "start": 13,
+        "end": 26,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "LOCATION",
+        "matched_value": "Pune",
+        "start": 28,
+        "end": 32,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "GEO_POLITICAL",
+        "matched_value": "Rankala Lake",
+        "start": 27,
+        "end": 39,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Kolhapur Maharashtra",
+        "start": 14,
+        "end": 34,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "ORGANIZATION",
+        "matched_value": "Aadhaar",
+        "start": 3,
+        "end": 10,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "1234 5678 9012",
+        "start": 21,
+        "end": 35,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "2024",
+        "start": 22,
+        "end": 26,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE_OF_BIRTH",
+        "matched_value": "12/05/2023",
+        "start": 81,
+        "end": 91,
+        "detection_method": "both",
+        "confidence": 0.7
+      },
+      {
+        "entity_type": "GEO_POLITICAL",
+        "matched_value": "Invoice",
+        "start": 93,
+        "end": 100,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "4500",
+        "start": 108,
+        "end": 112,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "DATE",
+        "matched_value": "2023",
+        "start": 125,
+        "end": 129,
+        "detection_method": "nlp",
+        "confidence": 0.75
+      },
+      {
+        "entity_type": "PHONE_GENERIC",
+        "matched_value": "1800-123-4567",
+        "start": 142,
+        "end": 155,
+        "detection_method": "regex",
+        "confidence": 0.7
+      }
+    ],
+    "false_negatives": [
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "123 MG Road, Kolhapur",
+        "start": 10,
+        "end": 31
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "Shivaji Nagar, Pune",
+        "start": 13,
+        "end": 32
+      },
+      {
+        "entity_type": "ADDRESS",
+        "matched_value": "Rankala Lake, Kolhapur",
+        "start": 27,
+        "end": 49
+      },
+      {
+        "entity_type": "MEDICAL_CONDITION",
+        "matched_value": "diabetes",
+        "start": 16,
+        "end": 24
+      },
+      {
+        "entity_type": "MEDICAL_CONDITION",
+        "matched_value": "hypertension",
+        "start": 29,
+        "end": 41
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Ajit",
+        "start": 0,
+        "end": 4
+      },
+      {
+        "entity_type": "FINANCIAL_VALUE",
+        "matched_value": "45000",
+        "start": 19,
+        "end": 24
+      },
+      {
+        "entity_type": "PERSON_NAME",
+        "matched_value": "Ajit",
+        "start": 0,
+        "end": 4
+      },
+      {
+        "entity_type": "LOCATION",
+        "matched_value": "Kolhapur",
+        "start": 14,
+        "end": 22
+      },
+      {
+        "entity_type": "LOCATION",
+        "matched_value": "Maharashtra",
+        "start": 23,
+        "end": 34
+      }
+    ]
+  },
+  "relaxed": {
+    "tp": 14,
+    "fp": 14,
+    "fn": 8,
+    "precision": 0.5,
+    "recall": 0.6364,
+    "f1": 0.56,
+    "per_type": {
+      "EMAIL": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "ORGANIZATION": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "AADHAAR": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "PERSON_NAME": {
+        "tp": 5,
+        "fp": 3,
+        "fn": 1,
+        "precision": 0.625,
+        "recall": 0.8333,
+        "f1": 0.7143
+      },
+      "DATE_OF_BIRTH": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "LOCATION": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.3333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      "PHONE": {
+        "tp": 2,
+        "fp": 4,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "ADDRESS": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "MEDICAL_CONDITION": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "FINANCIAL_VALUE": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    }
+  },
+  "per_document": [
+    {
+      "id": "n01_labelled_name",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n02_unlabelled_name",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n03_name_in_sentence",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Kolhapur",
+          "start": 32,
+          "end": 40,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n04_labelled_email",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Email",
+          "start": 0,
+          "end": 5,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n05_unlabelled_email",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n06_labelled_phone",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "9876543210",
+          "start": 19,
+          "end": 29,
+          "detection_method": "both",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n07_unlabelled_phone",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667
+      },
+      "false_positives": [
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "9876543210",
+          "start": 11,
+          "end": 21,
+          "detection_method": "both",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n08_address_sentence",
+      "gold": 1,
+      "predicted": 0,
+      "strict": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [],
+      "false_negatives": [
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "123 MG Road, Kolhapur",
+          "start": 10,
+          "end": 31
+        }
+      ]
+    },
+    {
+      "id": "n09_address_locality",
+      "gold": 1,
+      "predicted": 2,
+      "strict": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Shivaji Nagar",
+          "start": 13,
+          "end": 26,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "LOCATION",
+          "matched_value": "Pune",
+          "start": 28,
+          "end": 32,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "Shivaji Nagar, Pune",
+          "start": 13,
+          "end": 32
+        }
+      ]
+    },
+    {
+      "id": "n10_address_landmark",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "Rankala Lake",
+          "start": 27,
+          "end": 39,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "ADDRESS",
+          "matched_value": "Rankala Lake, Kolhapur",
+          "start": 27,
+          "end": 49
+        }
+      ]
+    },
+    {
+      "id": "n11_dob_sentence",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n12_birthday_sentence",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n13_medical_sentence",
+      "gold": 2,
+      "predicted": 0,
+      "strict": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [],
+      "false_negatives": [
+        {
+          "entity_type": "MEDICAL_CONDITION",
+          "matched_value": "diabetes",
+          "start": 16,
+          "end": 24
+        },
+        {
+          "entity_type": "MEDICAL_CONDITION",
+          "matched_value": "hypertension",
+          "start": 29,
+          "end": 41
+        }
+      ]
+    },
+    {
+      "id": "n14_person_and_org",
+      "gold": 2,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667
+      },
+      "false_positives": [],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Ajit",
+          "start": 0,
+          "end": 4
+        }
+      ]
+    },
+    {
+      "id": "n15_financial_sentence",
+      "gold": 1,
+      "predicted": 0,
+      "strict": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [],
+      "false_negatives": [
+        {
+          "entity_type": "FINANCIAL_VALUE",
+          "matched_value": "45000",
+          "start": 19,
+          "end": 24
+        }
+      ]
+    },
+    {
+      "id": "n16_location_sentence",
+      "gold": 3,
+      "predicted": 1,
+      "strict": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Kolhapur Maharashtra",
+          "start": 14,
+          "end": 34,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        }
+      ],
+      "false_negatives": [
+        {
+          "entity_type": "PERSON_NAME",
+          "matched_value": "Ajit",
+          "start": 0,
+          "end": 4
+        },
+        {
+          "entity_type": "LOCATION",
+          "matched_value": "Kolhapur",
+          "start": 14,
+          "end": 22
+        },
+        {
+          "entity_type": "LOCATION",
+          "matched_value": "Maharashtra",
+          "start": 23,
+          "end": 34
+        }
+      ]
+    },
+    {
+      "id": "n17_aadhaar_sentence",
+      "gold": 1,
+      "predicted": 3,
+      "strict": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 2,
+        "fn": 0,
+        "precision": 0.3333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "false_positives": [
+        {
+          "entity_type": "ORGANIZATION",
+          "matched_value": "Aadhaar",
+          "start": 3,
+          "end": 10,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "1234 5678 9012",
+          "start": 21,
+          "end": 35,
+          "detection_method": "both",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n18_signed_name",
+      "gold": 1,
+      "predicted": 1,
+      "strict": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "relaxed": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    },
+    {
+      "id": "n19_negative_sentences",
+      "gold": 0,
+      "predicted": 6,
+      "strict": {
+        "tp": 0,
+        "fp": 6,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 6,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [
+        {
+          "entity_type": "DATE",
+          "matched_value": "2024",
+          "start": 22,
+          "end": 26,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE_OF_BIRTH",
+          "matched_value": "12/05/2023",
+          "start": 81,
+          "end": 91,
+          "detection_method": "both",
+          "confidence": 0.7
+        },
+        {
+          "entity_type": "GEO_POLITICAL",
+          "matched_value": "Invoice",
+          "start": 93,
+          "end": 100,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "4500",
+          "start": 108,
+          "end": 112,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "DATE",
+          "matched_value": "2023",
+          "start": 125,
+          "end": 129,
+          "detection_method": "nlp",
+          "confidence": 0.75
+        },
+        {
+          "entity_type": "PHONE_GENERIC",
+          "matched_value": "1800-123-4567",
+          "start": 142,
+          "end": 155,
+          "detection_method": "regex",
+          "confidence": 0.7
+        }
+      ],
+      "false_negatives": []
+    },
+    {
+      "id": "n20_negative_capitalisation",
+      "gold": 0,
+      "predicted": 0,
+      "strict": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "relaxed": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "false_positives": [],
+      "false_negatives": []
+    }
+  ],
+  "label": "legacy_natural",
+  "engine": "legacy",
+  "split": "natural",
+  "generated_at": "2026-11-11T05:59:55.507316+00:00",
+  "nlp_available": true,
+  "elapsed_seconds": 0.3536
+}

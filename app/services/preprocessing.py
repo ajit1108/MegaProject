@@ -1,34 +1,87 @@
 # ============================================================
 # app/services/preprocessing.py
-# Text preprocessing before sensitive-data detection
+# Text normalisation with an offset map back to the original text.
+#
+# Detection runs on the normalised view, but every returned span is
+# mapped back, so highlighting and sanitisation always operate on the
+# exact characters of the original document.
 # ============================================================
 import re
 import unicodedata
 
+_NON_PRINTABLE_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
-def preprocess(text: str) -> str:
+
+def preprocess_with_offsets(text: str) -> tuple[str, list[int]]:
     """
-    Light preprocessing that preserves character offsets as much
-    as possible so that detection start/end positions remain valid
-    against the original text.
+    Normalise text and return (clean_text, offsets) where
+    offsets[i] is the index of clean_text[i] in the original string.
 
     Steps:
-    1. Unicode NFC normalisation
-    2. Replace CR+LF and bare CR with LF
-    3. Remove non-printable control characters (keep tab, LF)
-    4. Collapse runs of 3+ blank lines to 2 blank lines
+    1. Unicode NFC normalisation (skipped when it would change length,
+       because that would break a 1:1 character mapping)
+    2. CR+LF / bare CR -> LF
+    3. Remove non-printable control characters
+    4. Other unicode whitespace -> regular space
+    5. Collapse runs of 3+ newlines to 2 (keeps paragraphs readable)
     """
-    # 1. Unicode normalisation
-    text = unicodedata.normalize("NFC", text)
+    if not text:
+        return "", []
 
-    # 2. Normalise line endings
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    normalised = unicodedata.normalize("NFC", text)
+    if len(normalised) != len(text):
+        normalised = text
 
-    # 3. Strip non-printable control characters (keep \t and \n)
-    text = re.sub(r"[^\S\n\t]", " ", text)          # replace other whitespace chars
-    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+    chars: list[str] = []
+    mapping: list[int] = []
+    i = 0
+    length = len(normalised)
 
-    # 4. Collapse excessive blank lines
-    text = re.sub(r"\n{3,}", "\n\n", text)
+    while i < length:
+        ch = normalised[i]
+        if ch == "\r":
+            if i + 1 < length and normalised[i + 1] == "\n":
+                chars.append("\n")
+                mapping.append(i + 1)
+                i += 2
+            else:
+                chars.append("\n")
+                mapping.append(i)
+                i += 1
+            continue
+        if ch in ("\n", "\t"):
+            chars.append(ch)
+            mapping.append(i)
+            i += 1
+            continue
+        if _NON_PRINTABLE_RE.match(ch):
+            i += 1
+            continue
+        if ch.isspace() and ch != " ":
+            chars.append(" ")
+            mapping.append(i)
+            i += 1
+            continue
+        chars.append(ch)
+        mapping.append(i)
+        i += 1
 
-    return text
+    clean: list[str] = []
+    clean_map: list[int] = []
+    newline_run = 0
+    for ch, original_index in zip(chars, mapping):
+        if ch == "\n":
+            newline_run += 1
+            if newline_run > 2:
+                continue
+        else:
+            newline_run = 0
+        clean.append(ch)
+        clean_map.append(original_index)
+
+    return "".join(clean), clean_map
+
+
+def preprocess(text: str) -> str:
+    """Backward-compatible normaliser (no offset map)."""
+    return preprocess_with_offsets(text)[0]

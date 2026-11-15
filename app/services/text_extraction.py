@@ -5,7 +5,7 @@
 import io
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,24 @@ class ExtractionResult:
     warnings: list[str]
     success: bool
     error: Optional[str] = None
+    page_count: int = 1
+    # (start, end, page_number) spans into `text`, sorted by start.
+    # DOCX and TXT have no reliable page breaks, so they report a single span.
+    page_spans: list[tuple[int, int, int]] = field(default_factory=list)
+
+
+def page_for_offset(page_spans: list[tuple[int, int, int]], offset: int) -> int:
+    """Map a character offset to its 1-based source page (default 1)."""
+    for start, end, page in page_spans:
+        if start <= offset < end:
+            return page
+    if page_spans and offset >= page_spans[-1][1]:
+        return page_spans[-1][2]
+    return 1
+
+
+def _single_page(text: str) -> tuple[int, list[tuple[int, int, int]]]:
+    return 1, ([(0, len(text), 1)] if text else [])
 
 
 def extract_text(content: bytes, filename: str) -> ExtractionResult:
@@ -94,7 +112,22 @@ def _extract_pdf(content: bytes, warnings: list[str]) -> ExtractionResult:
             pages_text.append(p_text)
 
         doc.close()
-        full_text = "\n\n".join([p for p in pages_text if p]).strip()
+        # Join only non-empty pages, recording the offset range of each page so
+        # detections can be mapped back to the page they came from.
+        chunks: list[str] = []
+        page_spans: list[tuple[int, int, int]] = []
+        cursor = 0
+        for page_idx, p_text in enumerate(pages_text, start=1):
+            if not p_text:
+                continue
+            if chunks:
+                chunks.append("\n\n")
+                cursor += 2
+            start = cursor
+            chunks.append(p_text)
+            cursor += len(p_text)
+            page_spans.append((start, cursor, page_idx))
+        full_text = "".join(chunks)
 
         if used_ocr:
             warnings.append("OCR was performed on scanned or low-text PDF pages.")
@@ -108,6 +141,8 @@ def _extract_pdf(content: bytes, warnings: list[str]) -> ExtractionResult:
             used_ocr=used_ocr,
             warnings=warnings,
             success=True,
+            page_count=len(pages_text) or 1,
+            page_spans=page_spans,
         )
 
     except Exception as exc:
@@ -133,9 +168,11 @@ def _extract_docx(content: bytes, warnings: list[str]) -> ExtractionResult:
         text = "\n".join(paragraphs).strip()
         if not text:
             warnings.append("DOCX contains no extractable text.")
+        page_count, page_spans = _single_page(text)
         return ExtractionResult(
             text=text, file_type="docx", used_ocr=False,
-            warnings=warnings, success=True
+            warnings=warnings, success=True,
+            page_count=page_count, page_spans=page_spans,
         )
     except ImportError:
         return ExtractionResult(
@@ -155,9 +192,11 @@ def _extract_txt(content: bytes, warnings: list[str]) -> ExtractionResult:
     for encoding in ("utf-8", "utf-16", "latin-1", "ascii"):
         try:
             text = content.decode(encoding).strip()
+            page_count, page_spans = _single_page(text)
             return ExtractionResult(
                 text=text, file_type="txt", used_ocr=False,
-                warnings=warnings, success=True
+                warnings=warnings, success=True,
+                page_count=page_count, page_spans=page_spans,
             )
         except UnicodeDecodeError:
             continue
@@ -186,9 +225,11 @@ def _extract_image_ocr(content: bytes, ext: str, warnings: list[str]) -> Extract
     if not text:
         warnings.append("No readable text found in the image. Please ensure the image is clear and well-lit.")
 
+    page_count, page_spans = _single_page(text)
     return ExtractionResult(
         text=text, file_type=ext, used_ocr=True,
-        warnings=warnings, success=True
+        warnings=warnings, success=True,
+        page_count=page_count, page_spans=page_spans,
     )
 
 

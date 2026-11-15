@@ -16,6 +16,9 @@ const api = {
   async me() {
     return request('GET', '/api/auth/me');
   },
+  async logout() {
+    return request('POST', '/api/auth/logout');
+  },
 
   // ── Dashboard ─────────────────────────────────────────────
   async dashboardStats() {
@@ -53,6 +56,10 @@ const api = {
   async sanitize(analysisId, mode = 'redact') {
     return request('POST', `/api/analysis/${analysisId}/sanitize?mode=${mode}`);
   },
+  async restoreAnalysis(analysisId, text = null) {
+    return request('POST', `/api/analysis/${analysisId}/restore`,
+      text === null ? undefined : { text });
+  },
   async downloadSanitized(analysisId) {
     return downloadRequest(`/api/analysis/${analysisId}/sanitized-download`);
   },
@@ -61,8 +68,63 @@ const api = {
   },
 
   // ── Privacy Gateway ───────────────────────────────────────
-  async gatewayInspect(text, allowForward = false) {
-    return request('POST', '/api/privacy-gateway/inspect', { text, allow_forward: allowForward });
+  async gatewayInspect(text, allowForward = false, options = {}) {
+    const payload = {
+      text,
+      allow_forward: allowForward,
+      mode: options.mode || 'redact',
+      block_high_risk: options.blockHighRisk !== false,
+    };
+    if (options.inspectResponse) payload.inspect_response = options.inspectResponse;
+    return request('POST', '/api/privacy-gateway/inspect', payload);
+  },
+
+  // ── Privacy-aware RAG ─────────────────────────────────────
+  async ragStats() {
+    return request('GET', '/api/rag/stats');
+  },
+  async ragDocuments() {
+    return request('GET', '/api/rag/documents');
+  },
+  async ragIndex(analysisId) {
+    return request('POST', `/api/rag/index/${analysisId}`);
+  },
+  async ragQuery(question, options = {}) {
+    const payload = { question, top_k: options.topK || 5 };
+    if (options.documentIds?.length) payload.document_ids = options.documentIds;
+    if (options.conversationId) payload.conversation_id = options.conversationId;
+    return request('POST', '/api/rag/query', payload);
+  },
+  async ragConversations() {
+    return request('GET', '/api/rag/conversations');
+  },
+  async ragConversation(id) {
+    return request('GET', `/api/rag/conversations/${id}`);
+  },
+  async ragDeleteConversation(id) {
+    return request('DELETE', `/api/rag/conversations/${id}`);
+  },
+
+  // ── Analytics ─────────────────────────────────────────────
+  async analyticsSummary() {
+    return request('GET', '/api/analytics/summary');
+  },
+  async analyticsAudit(action = '', skip = 0, limit = 50) {
+    let url = `/api/analytics/audit?skip=${skip}&limit=${limit}`;
+    if (action) url += `&action=${encodeURIComponent(action)}`;
+    return request('GET', url);
+  },
+  async adminAnalytics() {
+    return request('GET', '/api/admin/analytics');
+  },
+  async adminAudit(userId = '', action = '', skip = 0, limit = 50) {
+    let url = `/api/admin/audit?skip=${skip}&limit=${limit}`;
+    if (action) url += `&action=${encodeURIComponent(action)}`;
+    if (userId) url += `&user_id=${encodeURIComponent(userId)}`;
+    return request('GET', url);
+  },
+  async adminUsers() {
+    return request('GET', '/api/admin/users');
   },
 
   // ── Reports ───────────────────────────────────────────────

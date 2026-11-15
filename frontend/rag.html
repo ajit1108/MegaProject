@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Document Q&amp;A — SensitiveDataDetector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="sidebar-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div><div class="brand-text">SensitiveData<br>Detector</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="/dashboard.html" class="nav-link" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="/upload.html"    class="nav-link" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload &amp; Scan</a>
+      <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
+      <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+      <div class="nav-label">Tools</div>
+      <a href="/rag.html" class="nav-link active" data-page="rag"><i class="fa-solid fa-comments"></i> Document Q&amp;A</a>
+      <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
+      <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
+      <div class="nav-label">Account</div>
+      <a href="/profile.html" class="nav-link" data-page="profile"><i class="fa-solid fa-user-shield"></i> Profile</a>
+      <a href="#" class="nav-link" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-pill">
+        <div class="u-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="u-name" id="sidebar-user-name">Loading…</div>
+             <div class="u-role" id="sidebar-user-role">User</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="menu-toggle" class="btn-icon btn-ghost"><i class="fa-solid fa-bars"></i></button>
+        <span class="topbar-title">Document Q&amp;A</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-outline btn-sm" id="new-convo-btn">
+          <i class="fa-solid fa-plus"></i> New Conversation
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="page-header">
+        <h1><i class="fa-solid fa-comments" style="color:var(--primary)"></i> Privacy-aware Document Q&amp;A</h1>
+        <p>Ask questions about your analysed documents. Retrieval is permission-scoped to your own files and every chunk is sanitized before it is used.</p>
+      </div>
+
+      <div class="alert alert-info mb-16">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>Answers are grounded in your indexed documents and cite page numbers. Retrieved text is treated as untrusted data — instructions inside documents are never executed. Without an explicitly enabled external AI provider, answers are generated locally from retrieved passages.</div>
+      </div>
+
+      <div class="stats-grid mb-24">
+        <div class="stat-card" style="--accent-color:var(--primary)">
+          <div class="stat-icon" style="color:var(--primary)"><i class="fa-solid fa-file-circle-check"></i></div>
+          <div class="stat-val" id="rag-analyses">—</div><div class="stat-lbl">Indexed Analyses</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--medium)">
+          <div class="stat-icon" style="color:var(--medium)"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="stat-val" id="rag-chunks">—</div><div class="stat-lbl">Indexed Chunks</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--low)">
+          <div class="stat-icon" style="color:var(--low)"><i class="fa-solid fa-comments"></i></div>
+          <div class="stat-val" id="rag-convos">—</div><div class="stat-lbl">Conversations</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--confidential)">
+          <div class="stat-icon" style="color:var(--confidential)"><i class="fa-solid fa-cubes"></i></div>
+          <div class="stat-val" id="rag-embedded">—</div><div class="stat-lbl">Embedded Chunks</div>
+        </div>
+      </div>
+
+      <div class="g2 mb-24">
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-circle-question"></i> Ask a Question</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Question</label>
+              <textarea class="form-control" id="rag-question" placeholder="e.g. When is the project scheduled to launch?"
+                        style="min-height:120px" maxlength="2000"></textarea>
+            </div>
+            <div class="flex gap-12 items-center" style="flex-wrap:wrap">
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Passages</label>
+                <select class="form-control" id="rag-topk" style="width:120px">
+                  <option value="3">3</option>
+                  <option value="5" selected>5</option>
+                  <option value="8">8</option>
+                  <option value="10">10</option>
+                </select>
+              </div>
+              <div class="text-sm text-muted" id="rag-convo-label" style="margin-top:18px">New conversation</div>
+            </div>
+            <div class="form-group mt-16">
+              <label class="form-label">Documents</label>
+              <div id="rag-doc-list" class="text-sm">
+                <p class="text-muted">Loading indexed documents…</p>
+              </div>
+              <p class="text-sm text-muted mt-8">Leave every box unchecked to search all of your indexed documents.</p>
+            </div>
+            <button class="btn btn-primary mt-16 btn-block" id="rag-ask-btn">
+              <i class="fa-solid fa-paper-plane"></i> Ask
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Conversations</span></div>
+          <div class="card-body" id="rag-convo-list">
+            <p class="text-sm text-muted">No conversations yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="rag-answer-card" class="card hidden mb-24">
+        <div class="card-head">
+          <span class="card-title"><i class="fa-solid fa-robot"></i> Answer</span>
+          <span class="badge badge-muted" id="rag-answer-meta"></span>
+        </div>
+        <div class="card-body">
+          <div id="rag-answer" class="text-preview" style="max-height:none;white-space:pre-wrap"></div>
+          <div id="rag-warnings" class="mt-16"></div>
+        </div>
+      </div>
+
+      <div id="rag-citations-card" class="card hidden">
+        <div class="card-head"><span class="card-title"><i class="fa-solid fa-bookmark"></i> Citations</span></div>
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead><tr><th>#</th><th>Document</th><th>Page</th><th>Sanitized Snippet</th></tr></thead>
+            <tbody id="rag-citations"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/rag.js"></script>
+</body>
+</html>

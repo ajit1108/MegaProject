@@ -38,7 +38,9 @@ class TestRegistration:
 
 class TestLogin:
     def test_login_invalid_credentials(self):
-        with patch("app.routes.auth.get_db") as mock_db:
+        with patch("app.routes.auth.get_db") as mock_db, \
+             patch("app.services.login_throttle.lock_seconds", return_value=0), \
+             patch("app.services.login_throttle.record_failure"):
             mock_db.return_value.users.find_one.return_value = None
             mock_db.return_value.audit_logs.insert_one.return_value = None
             res = client.post("/api/auth/login", json={

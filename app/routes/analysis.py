@@ -12,8 +12,14 @@ from app.database import get_db
 from app.security.authentication import get_current_user
 from app.services.document_service import analyse_document
 from app.services.sanitization import sanitize, sanitize_file
+from app.services.pseudonymization import (
+    build_pseudonyms,
+    load_mapping,
+    restore_text,
+    store_mapping,
+)
 from app.services.detection_engine import detect
-from app.services.preprocessing import preprocess
+from app.models.schemas import RestoreRequest
 from app.utils.file_validation import safe_filename
 
 router = APIRouter(prefix="/api/analysis", tags=["Analysis"])
@@ -26,12 +32,35 @@ def _safe_detection(det: dict) -> dict:
         "matched_value":          det.get("protected_preview", "***"),
         "start":                  det.get("start"),
         "end":                    det.get("end"),
+        "page":                   det.get("page", 1),
         "privacy_class":          det.get("privacy_class"),
         "classification_reason":  det.get("classification_reason"),
+        "category":               det.get("category", "General"),
         "risk_points":            det.get("risk_points"),
         "detection_method":       det.get("detection_method"),
         "confidence":             det.get("confidence"),
     }
+
+
+def _masked_text_preview(raw: str, detections: list[dict], limit: int = 500) -> str:
+    """Masked first `limit` characters, preserving length and offsets.
+
+    Each character inside a detected span is replaced by '*', so the
+    frontend can keep using start/end to highlight without revealing PII.
+    """
+    if not raw:
+        return ""
+    window = list(raw[:limit])
+    for det in detections:
+        start, end = det.get("start"), det.get("end")
+        if not isinstance(start, int) or not isinstance(end, int):
+            continue
+        if start >= limit or end <= start:
+            continue
+        for i in range(max(0, start), min(end, limit)):
+            if window[i] not in " \t\r\n":
+                window[i] = "*"
+    return "".join(window)
 
 
 def _analysis_to_out(a: dict, include_text: bool = False) -> dict:
@@ -45,8 +74,12 @@ def _analysis_to_out(a: dict, include_text: bool = False) -> dict:
         "risk_score":            a.get("risk_score", 0),
         "risk_level":            a.get("risk_level", "Low Risk"),
         "class_summary":         a.get("class_summary", {}),
+        "category_summary":      a.get("category_summary", {}),
+        "page_count":            a.get("page_count", 1),
         "risk_explanation":      a.get("risk_explanation", ""),
         "sanitization_status":   a.get("sanitization_status", "not_sanitized"),
+        "sanitization_mode":     a.get("sanitization_mode"),
+        "pseudonymized":         a.get("sanitization_mode") == "pseudonymize",
         "sanitized_filename":    a.get("sanitized_filename"),
         "sanitized_file_type":   a.get("sanitized_file_type"),
         "used_ocr":              a.get("used_ocr", False),
@@ -54,7 +87,13 @@ def _analysis_to_out(a: dict, include_text: bool = False) -> dict:
         "created_at":            a.get("created_at"),
     }
     if include_text:
-        out["extracted_text_preview"] = (a.get("extracted_text") or "")[:500]
+        raw_text = a.get("extracted_text") or ""
+        out["extracted_text_preview"] = _masked_text_preview(
+            raw_text, a.get("detections", [])
+        )
+        # Owner-only view: show the stored sanitized output so a reload does not
+        # lose the result. The original file is never modified.
+        out["sanitized_text"] = a.get("sanitized_text", "")
     return out
 
 
@@ -165,11 +204,21 @@ async def sanitize_analysis(
     raw_text   = a.get("extracted_text", "")
     detections = a.get("detections", [])
 
-    if mode not in ("redact", "mask"):
+    if mode not in ("redact", "mask", "remove", "pseudonymize"):
         mode = "redact"
 
+    # Pseudonymization: deterministic tokens + encrypted restoration mapping.
+    span_replacements = None
+    value_replacements = None
+    pseudo_entries: list[dict] = []
+    if mode == "pseudonymize":
+        span_replacements, value_replacements, pseudo_entries = build_pseudonyms(
+            analysis_id, detections
+        )
+        store_mapping(db, uid, analysis_id, pseudo_entries)
+
     # 1. Generate text sanitization
-    sanitized_text = sanitize(raw_text, detections, mode=mode)
+    sanitized_text = sanitize(raw_text, detections, mode=mode, replacements=span_replacements)
 
     # 2. Generate format-preserving file sanitization
     doc_id = a.get("document_id")
@@ -194,6 +243,8 @@ async def sanitize_analysis(
                 filename=orig_fname,
                 detections=detections,
                 mode=mode,
+                replacements=span_replacements,
+                value_replacements=value_replacements,
             )
             sanitized_file_type = (sanitized_filename.rsplit(".", 1)[-1]).lower()
             internal_sanitized_name = safe_filename(f"sanitized_{sanitized_filename}")
@@ -216,13 +267,17 @@ async def sanitize_analysis(
             sf.write(sanitized_text.encode("utf-8"))
 
     # Verify: re-run detection on sanitized text output
-    clean_again = preprocess(sanitized_text)
-    remaining   = detect(clean_again)
+    remaining   = detect(sanitized_text)
     warnings    = []
     if remaining:
         warnings.append(
             f"Re-scan found {len(remaining)} potentially sensitive pattern(s) "
             "still detectable in the sanitized text. Review before sharing."
+        )
+    if mode == "pseudonymize" and sanitized_file_type in ("png", "jpg", "jpeg"):
+        warnings.append(
+            "Images are protected with visual redaction; pseudonym tokens are "
+            "available only in the extracted text output."
         )
 
     # Store sanitized metadata
@@ -240,6 +295,23 @@ async def sanitize_analysis(
             "sanitization_warnings": warnings,
             "sanitized_at":          datetime.now(timezone.utc),
         }}
+    )
+
+    db.sanitized_documents.update_one(
+        {"analysis_id": oid, "user_id": uid},
+        {"$set": {
+            "analysis_id":          oid,
+            "document_id":          doc_id,
+            "user_id":              uid,
+            "sanitized_filename":   sanitized_filename,
+            "sanitized_file_path":  sanitized_file_path,
+            "sanitized_mime_type":  sanitized_mime_type,
+            "mode":                 mode,
+            "remaining_detections": len(remaining),
+            "pseudonymized":        mode == "pseudonymize",
+            "created_at":           datetime.now(timezone.utc),
+        }},
+        upsert=True,
     )
 
     db.audit_logs.insert_one({
@@ -260,9 +332,60 @@ async def sanitize_analysis(
         "mode":                  mode,
         "remaining_detections":  len(remaining),
         "warnings":              warnings,
+        "pseudonymized":         mode == "pseudonymize",
+        "pseudonym_count":       len(pseudo_entries),
         "download_url":          f"/api/analysis/{analysis_id}/sanitized-download",
         "preview_url":           f"/api/analysis/{analysis_id}/sanitized-preview",
         "original_text_preview": raw_text[:300] + ("..." if len(raw_text) > 300 else ""),
+    }
+
+
+@router.post("/{analysis_id}/restore")
+async def restore_analysis(
+    analysis_id: str,
+    payload: RestoreRequest | None = None,
+    current_user: dict = Depends(get_current_user),
+):
+    """Restore pseudonym tokens to their original values (owner only)."""
+    db  = get_db()
+    uid = current_user["_id"]
+    try:
+        oid = ObjectId(analysis_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid analysis ID.")
+
+    a = db.analyses.find_one({"_id": oid, "user_id": uid})
+    if not a:
+        raise HTTPException(status_code=404, detail="Analysis not found.")
+
+    entries = load_mapping(db, uid, analysis_id)
+    if not entries:
+        raise HTTPException(
+            status_code=400,
+            detail="No pseudonym mapping exists for this analysis. "
+                   "Sanitize with mode=pseudonymize first.",
+        )
+
+    source = payload.text if payload and payload.text is not None else a.get("sanitized_text", "")
+    if not source:
+        raise HTTPException(status_code=400, detail="No sanitized text available to restore.")
+
+    restored, replaced = restore_text(source, entries)
+
+    db.audit_logs.insert_one({
+        "user_id":         uid,
+        "action":          "restore",
+        "analysis_id":     str(oid),
+        "tokens_restored": replaced,
+        "status":          "success",
+        "timestamp":       datetime.now(timezone.utc),
+    })
+
+    return {
+        "analysis_id":     analysis_id,
+        "restored_text":   restored,
+        "tokens_restored": replaced,
+        "mapping_entries": len(entries),
     }
 
 
@@ -373,5 +496,16 @@ async def delete_analysis(
     if not a:
         raise HTTPException(status_code=404, detail="Analysis not found.")
 
+    sanitized = db.sanitized_documents.find_one({"analysis_id": oid, "user_id": uid})
+    for path in (a.get("sanitized_file_path"), (sanitized or {}).get("sanitized_file_path")):
+        if path and os.path.isfile(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
     db.analyses.delete_one({"_id": oid})
+    db.sanitized_documents.delete_many({"analysis_id": oid})
+    db.pseudonym_maps.delete_many({"analysis_id": oid, "user_id": uid})
+    db.rag_chunks.delete_many({"analysis_id": oid, "user_id": uid})
     return {"message": "Analysis record deleted."}

@@ -13,7 +13,9 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from app.config import get_settings
 from app.database import connect_db, close_db
-from app.routes import auth, dashboard, documents, analysis, privacy_gateway, reports
+from app.routes import (
+    auth, dashboard, documents, analysis, privacy_gateway, reports, rag, analytics,
+)
 
 # ── Logging ───────────────────────────────────────────────────
 logging.basicConfig(
@@ -33,8 +35,22 @@ JS_DIR       = FRONTEND_DIR / "js"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting Sensitive Data Detection API …")
-    connect_db()
     settings = get_settings()
+
+    if settings.is_production and settings.secret_key == "change-this-secret-key":
+        raise RuntimeError(
+            "Refusing to start in production with the default SECRET_KEY. "
+            "Set SECRET_KEY to a long random value."
+        )
+    if settings.is_production and not settings.pseudonym_key:
+        logger.warning(
+            "PSEUDONYM_KEY is unset; pseudonym mappings will use SECRET_KEY. "
+            "Set a dedicated PSEUDONYM_KEY for production."
+        )
+    if settings.is_production and "*" in settings.cors_origin_list:
+        logger.warning("CORS is open to all origins. Set CORS_ORIGINS in production.")
+
+    connect_db()
     os.makedirs(settings.upload_dir, exist_ok=True)
     yield
     logger.info("Shutting down …")
@@ -55,10 +71,13 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────
+_settings = get_settings()
+_origins = _settings.cors_origin_list
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # tighten in production
-    allow_credentials=True,
+    allow_origins=_origins,
+    # The wildcard cannot be combined with credentialed requests.
+    allow_credentials=_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -70,15 +89,30 @@ app.include_router(documents.router)
 app.include_router(analysis.router)
 app.include_router(privacy_gateway.router)
 app.include_router(reports.router)
+app.include_router(rag.router)
+app.include_router(analytics.router)
+app.include_router(analytics.admin_router)
 
 # ── Health check ──────────────────────────────────────────────
 @app.get("/api/health", tags=["Health"])
 async def health():
+    from app.database import get_db
     from app.services.detection_engine import nlp_is_available
+
+    settings = get_settings()
+    try:
+        get_db().command("ping")
+        database = "ok"
+    except Exception:
+        database = "unreachable"
+
     return {
-        "status":        "ok",
-        "nlp_available": nlp_is_available(),
-        "version":       "1.0.0",
+        "status":              "ok" if database == "ok" else "degraded",
+        "database":            database,
+        "nlp_available":       nlp_is_available(),
+        "external_ai_enabled": settings.external_ai_enabled,
+        "environment":         settings.app_env,
+        "version":             "1.0.0",
     }
 
 
@@ -96,7 +130,7 @@ if JS_DIR.exists():
 HTML_PAGES = [
     "index", "login", "register", "dashboard", "upload",
     "documents", "analysis", "history", "privacy-gateway",
-    "reports", "profile",
+    "reports", "profile", "rag",
 ]
 
 if FRONTEND_DIR.exists():

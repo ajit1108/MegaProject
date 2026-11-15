@@ -8,10 +8,14 @@ import logging
 from datetime import datetime, timezone
 from bson import ObjectId
 from app.database import get_db
-from app.services.text_extraction import extract_text
-from app.services.preprocessing import preprocess
+from app.services.text_extraction import extract_text, page_for_offset
 from app.services.detection_engine import detect
-from app.services.classification import classify, class_risk_points
+from app.services.classification import (
+    classify,
+    class_risk_points,
+    data_category,
+    category_summary,
+)
 from app.services.risk_scoring import calculate_risk
 from app.services.sanitization import protect_preview
 
@@ -45,11 +49,9 @@ def analyse_document(document_id: str, content: bytes, filename: str, user_id: s
 
         raw_text = extraction.text
 
-        # 2. Preprocess
-        clean_text = preprocess(raw_text)
-
-        # 3. Detect
-        detections = detect(clean_text)
+        # 2. Detect — the engine normalises internally and keeps all
+        #    offsets anchored to raw_text, so stored spans stay valid.
+        detections = detect(raw_text)
 
         # 4. Classify + calculate risk contributions
         enriched: list[dict] = []
@@ -62,10 +64,12 @@ def analyse_document(document_id: str, content: bytes, filename: str, user_id: s
                 "protected_preview":    protect_preview(det.matched_value, det.entity_type),
                 "start":               det.start,
                 "end":                 det.end,
+                "page":                page_for_offset(extraction.page_spans, det.start),
                 "detection_method":    det.detection_method,
                 "confidence":          det.confidence,
                 "privacy_class":       privacy_class,
                 "classification_reason": reason,
+                "category":            data_category(det),
                 "risk_points":         risk_pts,
             })
 
@@ -90,10 +94,13 @@ def analyse_document(document_id: str, content: bytes, filename: str, user_id: s
             "risk_score":          risk.score,
             "risk_level":          risk.level,
             "class_summary":       class_summary,
+            "category_summary":    category_summary(enriched),
             "risk_explanation":    risk.explanation,
             "sanitization_status": "not_sanitized",
             "sanitized_text":      None,
             "used_ocr":            extraction.used_ocr,
+            "page_count":          extraction.page_count,
+            "page_spans":          [list(span) for span in extraction.page_spans],
             "extraction_warnings": extraction.warnings,
             "created_at":          datetime.now(timezone.utc),
         }
@@ -115,6 +122,18 @@ def analyse_document(document_id: str, content: bytes, filename: str, user_id: s
             "status":   "success",
             "timestamp": datetime.now(timezone.utc),
         })
+
+        # Build the privacy-aware RAG index (failure must not break analysis)
+        try:
+            from app.services.rag import index_analysis
+            index_analysis(db, user_oid, analysis_doc)
+        except Exception as exc:
+            logger.warning("RAG indexing failed for analysis %s: %s",
+                           analysis_doc["_id"], type(exc).__name__)
+            db.analyses.update_one(
+                {"_id": analysis_doc["_id"], "user_id": user_oid},
+                {"$set": {"indexing_status": "failed", "indexed_chunks": 0}},
+            )
 
         return analysis_doc
 

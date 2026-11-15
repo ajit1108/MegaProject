@@ -22,6 +22,7 @@
       <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
       <a href="/history.html"   class="nav-link active" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
       <div class="nav-label">Tools</div>
+      <a href="/rag.html" class="nav-link" data-page="rag"><i class="fa-solid fa-comments"></i> Document Q&amp;A</a>
       <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
       <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
       <div class="nav-label">Account</div>
@@ -138,10 +139,10 @@
             <table>
               <thead>
                 <tr><th>Entity Type</th><th>Value (Protected)</th><th>Classification</th>
-                    <th>Method</th><th>Confidence</th><th>Reason</th></tr>
+                    <th>Category</th><th>Page</th><th>Method</th><th>Confidence</th><th>Reason</th></tr>
               </thead>
               <tbody id="det-tbody">
-                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">Loading…</td></tr>
+                <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted)">Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -151,11 +152,13 @@
         <div class="card">
           <div class="card-head"><span class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Sanitization</span></div>
           <div class="card-body">
-            <p class="text-muted text-sm mb-16">Replace detected sensitive values with redaction placeholders or masked versions. A re-scan will verify the sanitized output.</p>
-            <div class="flex gap-12 items-center">
-              <select class="form-control" id="san-mode" style="width:180px">
+            <p class="text-muted text-sm mb-16">Protect the detected values before sharing: redact, partially mask, remove, or replace them with reversible pseudonym tokens. A re-scan verifies the sanitized output.</p>
+            <div class="flex gap-12 items-center" style="flex-wrap:wrap">
+              <select class="form-control" id="san-mode" style="width:220px">
                 <option value="redact">Full Redaction</option>
                 <option value="mask">Partial Masking</option>
+                <option value="remove">Remove Values</option>
+                <option value="pseudonymize">Pseudonymize (reversible)</option>
               </select>
               <button class="btn btn-primary" id="sanitize-btn">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Sanitize Document
@@ -183,9 +186,19 @@
                 </div>
               </div>
               <div id="san-warning" class="alert alert-warning hidden mt-8"></div>
-              <button class="btn btn-success mt-16" id="download-btn">
-                <i class="fa-solid fa-download"></i> Download Sanitized File
-              </button>
+              <div class="flex gap-12 items-center mt-16" style="flex-wrap:wrap">
+                <button class="btn btn-success" id="download-btn">
+                  <i class="fa-solid fa-download"></i> Download Sanitized File
+                </button>
+                <button class="btn btn-outline hidden" id="restore-btn">
+                  <i class="fa-solid fa-rotate-left"></i> Restore Pseudonyms (owner only)
+                </button>
+              </div>
+              <div id="restore-result" class="hidden mt-16">
+                <h4 class="text-sm fw-600 mb-8"><i class="fa-solid fa-lock-open"></i> Restored Text</h4>
+                <div class="text-preview" id="restored-text" style="max-height:200px"></div>
+                <div class="text-sm text-muted mt-8" id="restore-meta"></div>
+              </div>
             </div>
           </div>
         </div>

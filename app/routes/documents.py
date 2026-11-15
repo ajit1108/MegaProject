@@ -130,10 +130,23 @@ async def delete_document(
         except OSError:
             pass
 
-    # Delete from DB (cascade to analyses)
+    # Delete from DB (cascade to analyses, sanitized outputs, mappings)
+    analysis_ids = [x["_id"] for x in db.analyses.find({"document_id": oid}, {"_id": 1})]
+    for rec in db.sanitized_documents.find({"document_id": oid}, {"sanitized_file_path": 1}):
+        sfp = rec.get("sanitized_file_path")
+        if sfp and os.path.isfile(sfp):
+            try:
+                os.remove(sfp)
+            except OSError:
+                pass
     db.documents.delete_one({"_id": oid})
     db.analyses.delete_many({"document_id": oid})
     db.sanitized_documents.delete_many({"document_id": oid})
+    db.rag_chunks.delete_many({"document_id": oid, "user_id": uid})
+    if analysis_ids:
+        db.pseudonym_maps.delete_many(
+            {"analysis_id": {"$in": analysis_ids}, "user_id": uid}
+        )
 
     db.audit_logs.insert_one({
         "user_id":   uid,

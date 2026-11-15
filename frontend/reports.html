@@ -22,6 +22,7 @@
       <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
       <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
       <div class="nav-label">Tools</div>
+      <a href="/rag.html" class="nav-link" data-page="rag"><i class="fa-solid fa-comments"></i> Document Q&amp;A</a>
       <a href="/privacy-gateway.html" class="nav-link" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
       <a href="/reports.html" class="nav-link active" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
       <div class="nav-label">Account</div>
@@ -80,6 +81,26 @@
         </div>
       </div>
 
+      <!-- Activity Stats -->
+      <div class="stats-grid mb-24">
+        <div class="stat-card" style="--accent-color:var(--primary)">
+          <div class="stat-icon" style="color:var(--primary)"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div class="stat-val" id="r-sanitized">—</div><div class="stat-lbl">Sanitized Documents</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--medium)">
+          <div class="stat-icon" style="color:var(--medium)"><i class="fa-solid fa-shield-virus"></i></div>
+          <div class="stat-val" id="r-gateway">—</div><div class="stat-lbl">Gateway Inspections</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--high)">
+          <div class="stat-icon" style="color:var(--high)"><i class="fa-solid fa-ban"></i></div>
+          <div class="stat-val" id="r-blocked">—</div><div class="stat-lbl">Blocked by Policy</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--low)">
+          <div class="stat-icon" style="color:var(--low)"><i class="fa-solid fa-comments"></i></div>
+          <div class="stat-val" id="r-rag">—</div><div class="stat-lbl">Document Q&amp;A Queries</div>
+        </div>
+      </div>
+
       <div class="g2 mb-24">
         <!-- Classification distribution -->
         <div class="card">
@@ -96,6 +117,20 @@
               <tbody id="entity-tbody"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div class="g2 mb-24">
+        <!-- Data category distribution -->
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-tags"></i> By Data Category</span></div>
+          <div class="card-body" id="cat-breakdown"></div>
+        </div>
+
+        <!-- Detection method distribution -->
+        <div class="card">
+          <div class="card-head"><span class="card-title"><i class="fa-solid fa-microscope"></i> By Detection Method</span></div>
+          <div class="card-body" id="method-breakdown"></div>
         </div>
       </div>
 

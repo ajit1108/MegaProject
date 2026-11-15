@@ -22,6 +22,7 @@
       <a href="/documents.html" class="nav-link" data-page="documents"><i class="fa-solid fa-folder-open"></i> My Documents</a>
       <a href="/history.html"   class="nav-link" data-page="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
       <div class="nav-label">Tools</div>
+      <a href="/rag.html" class="nav-link" data-page="rag"><i class="fa-solid fa-comments"></i> Document Q&amp;A</a>
       <a href="/privacy-gateway.html" class="nav-link active" data-page="gateway"><i class="fa-solid fa-shield-virus"></i> Privacy Gateway</a>
       <a href="/reports.html" class="nav-link" data-page="reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
       <div class="nav-label">Account</div>
@@ -66,11 +67,29 @@
               <textarea class="form-control" id="gw-input" placeholder="Paste text here…" style="min-height:200px"></textarea>
               <div class="form-hint">Maximum 100,000 characters.</div>
             </div>
-            <div class="flex gap-12 items-center">
+            <div class="form-group mt-16">
+              <label class="form-label">Sanitization Mode</label>
+              <select class="form-control" id="gw-mode">
+                <option value="redact">Full Redaction — [TYPE_REDACTED]</option>
+                <option value="mask">Partial Masking — keep last characters</option>
+                <option value="pseudonymize">Pseudonymize — [TYPE_8HEX] tokens</option>
+                <option value="remove">Remove — delete the value entirely</option>
+              </select>
+            </div>
+            <div class="flex gap-12 items-center" style="flex-wrap:wrap">
               <label class="flex gap-8 items-center" style="cursor:pointer;user-select:none">
                 <input type="checkbox" id="allow-forward">
                 <span class="text-sm">Permit forwarding if Low Risk</span>
               </label>
+              <label class="flex gap-8 items-center" style="cursor:pointer;user-select:none">
+                <input type="checkbox" id="block-high" checked>
+                <span class="text-sm">Block High Risk automatically</span>
+              </label>
+            </div>
+            <div class="form-group mt-16">
+              <label class="form-label">Response to Inspect (optional)</label>
+              <textarea class="form-control" id="gw-response" placeholder="Paste a response received from an external AI service to check for leaked values…" style="min-height:90px"></textarea>
+              <div class="form-hint">The response is scanned for values that were present in the original input.</div>
             </div>
             <button class="btn btn-primary mt-16 btn-block" id="inspect-btn">
               <i class="fa-solid fa-magnifying-glass-chart"></i> Inspect for Sensitive Data
@@ -98,6 +117,25 @@
               </div>
               <div id="gw-forward-status" class="mt-16"></div>
               <div id="gw-warnings" class="mt-8"></div>
+              <div class="g2 mt-16">
+                <div>
+                  <h4 class="text-sm fw-600 mb-8">Classification</h4>
+                  <div id="gw-class-summary"></div>
+                </div>
+                <div>
+                  <h4 class="text-sm fw-600 mb-8">Data Categories</h4>
+                  <div id="gw-category-summary"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-16" id="gw-response-card" style="display:none">
+            <div class="card-head"><span class="card-title"><i class="fa-solid fa-reply-all"></i> External Response Inspection</span></div>
+            <div class="card-body">
+              <div id="gw-response-status"></div>
+              <h4 class="text-sm fw-600 mt-16 mb-8">Sanitized Response</h4>
+              <div class="text-preview" id="gw-response-safe"></div>
             </div>
           </div>
 
@@ -115,7 +153,7 @@
             <div class="card-head"><span class="card-title"><i class="fa-solid fa-tags"></i> Detections</span></div>
             <div class="table-wrap" style="border:none">
               <table>
-                <thead><tr><th>Entity Type</th><th>Value</th><th>Classification</th><th>Method</th></tr></thead>
+                <thead><tr><th>Entity Type</th><th>Value</th><th>Classification</th><th>Category</th><th>Method</th></tr></thead>
                 <tbody id="gw-det-tbody"></tbody>
               </table>
             </div>
@@ -139,7 +177,11 @@
     btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Inspecting…';
 
     try {
-      const res = await api.gatewayInspect(text, allowFwd);
+      const res = await api.gatewayInspect(text, allowFwd, {
+        mode: document.getElementById('gw-mode').value,
+        blockHighRisk: document.getElementById('block-high').checked,
+        inspectResponse: document.getElementById('gw-response').value.trim(),
+      });
       renderGatewayResult(res);
       document.getElementById('gw-result').classList.remove('hidden');
     } catch(err){ toast(err.message,'error'); }
@@ -161,22 +203,59 @@
     document.getElementById('gw-sanitized').textContent = res.sanitized_text||'';
 
     const fwdEl = document.getElementById('gw-forward-status');
-    fwdEl.innerHTML = res.permit_forward
-      ? '<div class="badge badge-low"><i class="fa-solid fa-check"></i> Forwarding permitted (Low Risk)</div>'
-      : '<div class="badge badge-high"><i class="fa-solid fa-xmark"></i> Forwarding NOT recommended — review sanitized text first</div>';
+    const decision = res.decision || (res.permit_forward ? 'allowed' : 'sanitized_only');
+    const banners = {
+      blocked: '<div class="badge badge-high"><i class="fa-solid fa-ban"></i> Blocked by policy — High Risk content must not be forwarded</div>',
+      allowed: '<div class="badge badge-low"><i class="fa-solid fa-check"></i> Forwarding permitted (Low Risk, sanitized output only)</div>',
+      sanitized_only: '<div class="badge badge-medium"><i class="fa-solid fa-shield-halved"></i> Sanitized only — review the protected output before sharing</div>',
+    };
+    fwdEl.innerHTML = banners[decision] || banners.sanitized_only;
 
     const warnEl = document.getElementById('gw-warnings');
     warnEl.innerHTML = (res.warnings||[]).map(w=>`<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i> ${escHtml(w)}</div>`).join('');
 
+    // Class + category summaries
+    const order = ['Restricted','Confidential','Internal','Public'];
+    const classHtml = order.map(c => {
+      const cnt = (res.class_summary||{})[c] || 0;
+      return `<div class="flex justify-between items-center mb-8">${clsBadge(c)}<span class="text-sm fw-600">${cnt}</span></div>`;
+    }).join('');
+    document.getElementById('gw-class-summary').innerHTML =
+      Object.keys(res.class_summary||{}).length ? classHtml
+      : '<span class="text-sm text-muted">No classified entities.</span>';
+
+    const catEntries = Object.entries(res.category_summary||{}).sort((a,b)=>b[1]-a[1]);
+    document.getElementById('gw-category-summary').innerHTML = catEntries.length
+      ? catEntries.map(([cat,cnt]) =>
+          `<div class="flex justify-between items-center mb-8"><span class="text-sm">${escHtml(cat)}</span>
+           <span class="badge badge-muted">${cnt}</span></div>`).join('')
+      : '<span class="text-sm text-muted">No categories detected.</span>';
+
+    // External response inspection
+    const insp = res.response_inspection;
+    const respCard = document.getElementById('gw-response-card');
+    if (insp) {
+      respCard.style.display = '';
+      document.getElementById('gw-response-status').innerHTML = insp.safe
+        ? '<div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> No values from your input leaked into the external response.</div>'
+        : `<div class="alert alert-warning"><i class="fa-solid fa-triangle-exclamation"></i>
+             <strong>${insp.leaked_from_input}</strong> value(s) from your input leaked into the response${insp.entity_types?.length ? ` (${insp.entity_types.map(escHtml).join(', ')})` : ''}.
+           </div>`;
+      document.getElementById('gw-response-safe').textContent = insp.sanitized_response || '';
+    } else {
+      respCard.style.display = 'none';
+    }
+
     const tbody = document.getElementById('gw-det-tbody');
     if (!res.detections?.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">No sensitive entities detected.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-muted)">No sensitive entities detected.</td></tr>';
     } else {
       tbody.innerHTML = res.detections.map(d=>`
         <tr>
           <td><span class="badge badge-muted text-mono">${escHtml(d.entity_type)}</span></td>
           <td class="text-mono text-sm">${escHtml(d.matched_value||'***')}</td>
           <td>${clsBadge(d.privacy_class)}</td>
+          <td><span class="text-sm">${escHtml(d.category || 'General')}</span></td>
           <td><span class="badge badge-primary">${escHtml(d.detection_method)}</span></td>
         </tr>`).join('');
     }

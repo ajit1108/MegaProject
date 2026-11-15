@@ -20,18 +20,35 @@ REDACT_PLACEHOLDERS: dict[str, str] = {
     "PHONE_IN":       "[PHONE_REDACTED]",
     "PHONE_GENERIC":  "[PHONE_REDACTED]",
     "AADHAAR":        "[AADHAAR_REDACTED]",
+    "AADHAAR_FORMAT": "[AADHAAR_REDACTED]",
     "PAN":            "[PAN_REDACTED]",
+    "PASSPORT":       "[PASSPORT_REDACTED]",
+    "GSTIN":          "[GSTIN_REDACTED]",
+    "BANK_ACCOUNT":   "[ACCOUNT_REDACTED]",
+    "IFSC":           "[IFSC_REDACTED]",
+    "VOTER_ID":       "[VOTER_ID_REDACTED]",
+    "DRIVERS_LICENSE":"[LICENCE_REDACTED]",
+    "UPI_ID":         "[UPI_REDACTED]",
     "CREDIT_CARD":    "[CARD_REDACTED]",
     "IP_ADDRESS":     "[IP_REDACTED]",
     "DATE_OF_BIRTH":  "[DOB_REDACTED]",
+    "PIN_CODE":       "[PIN_REDACTED]",
+    "USERNAME":       "[USERNAME_REDACTED]",
+    "EMPLOYEE_ID":    "[EMPLOYEE_ID_REDACTED]",
+    "CUSTOMER_ID":    "[CUSTOMER_ID_REDACTED]",
     "API_KEY":        "[API_KEY_REDACTED]",
     "PASSWORD":       "[PASSWORD_REDACTED]",
     "PERSON_NAME":    "[PERSON_REDACTED]",
+    "ADDRESS":        "[ADDRESS_REDACTED]",
     "ORGANIZATION":   "[ORG_REDACTED]",
     "GEO_POLITICAL":  "[LOCATION_REDACTED]",
     "LOCATION":       "[LOCATION_REDACTED]",
     "FACILITY":       "[FACILITY_REDACTED]",
     "FINANCIAL_VALUE":"[FINANCIAL_REDACTED]",
+    "MEDICAL_CONDITION": "[MEDICAL_REDACTED]",
+    "MEDICAL_TREATMENT": "[TREATMENT_REDACTED]",
+    "MEDICATION":     "[MEDICATION_REDACTED]",
+    "BLOOD_GROUP":    "[BLOOD_GROUP_REDACTED]",
     "DATE":           "[DATE_REDACTED]",
 }
 
@@ -60,7 +77,7 @@ def _mask_value(value: str, entity_type: str) -> str:
     if entity_type in ("PHONE_IN", "PHONE_GENERIC"):
         digits = re.sub(r"\D", "", value)
         return "X" * max(0, len(digits) - 4) + digits[-4:] if len(digits) >= 4 else "XXXX"
-    if entity_type in ("AADHAAR",):
+    if entity_type in ("AADHAAR", "AADHAAR_FORMAT"):
         digits = re.sub(r"\D", "", value)
         return "XXXX-XXXX-" + digits[-4:] if len(digits) >= 4 else "XXXX-XXXX-XXXX"
     if entity_type == "PAN":
@@ -68,6 +85,20 @@ def _mask_value(value: str, entity_type: str) -> str:
     if entity_type == "CREDIT_CARD":
         digits = re.sub(r"\D", "", value)
         return "*" * max(0, len(digits) - 4) + digits[-4:]
+    if entity_type in ("BANK_ACCOUNT", "PASSPORT", "VOTER_ID", "DRIVERS_LICENSE", "PIN_CODE"):
+        digits = re.sub(r"\D", "", value)
+        if entity_type == "BANK_ACCOUNT":
+            return "X" * max(0, len(digits) - 4) + digits[-4:]
+        return value[0] + "*" * max(1, len(value) - 2) + value[-1]
+    if entity_type == "IFSC":
+        return value[:2] + "***" + value[-2:] if len(value) >= 4 else "***"
+    if entity_type == "UPI_ID":
+        local, _, handle = value.partition("@")
+        return (local[0] + "***@" + handle) if local else "***"
+    if entity_type == "ADDRESS":
+        return value[:12] + "…" if len(value) > 12 else "***"
+    if entity_type in ("MEDICAL_CONDITION", "MEDICAL_TREATMENT", "MEDICATION", "BLOOD_GROUP"):
+        return "***"
     if len(value) <= 3:
         return "***"
     return value[0] + "*" * (len(value) - 2) + value[-1]
@@ -78,10 +109,17 @@ def protect_preview(value: str, entity_type: str) -> str:
     return _mask_value(value, entity_type)
 
 
-def sanitize(text: str, detections: list[dict[str, Any]], mode: str = "redact") -> str:
+def sanitize(
+    text: str,
+    detections: list[dict[str, Any]],
+    mode: str = "redact",
+    replacements: dict[tuple[int, int], str] | None = None,
+) -> str:
     """
     Replace sensitive spans in string text using verified offset positions.
     Processes right-to-left to keep earlier offsets valid.
+
+    `replacements` overrides the per-span replacement (used for pseudonyms).
     """
     if not text or not detections:
         return text
@@ -110,7 +148,11 @@ def sanitize(text: str, detections: list[dict[str, Any]], mode: str = "redact") 
         if start < 0 or end <= start or end > len(result):
             continue
 
-        if mode == "mask":
+        if replacements and (start, end) in replacements:
+            replacement = replacements[(start, end)]
+        elif mode == "remove":
+            replacement = ""
+        elif mode == "mask":
             replacement = _mask_value(det.get("matched_value", ""), etype)
         else:
             replacement = REDACT_PLACEHOLDERS.get(etype, DEFAULT_PLACEHOLDER)
@@ -120,6 +162,21 @@ def sanitize(text: str, detections: list[dict[str, Any]], mode: str = "redact") 
     return result
 
 
+def _replacement_value(
+    value: str,
+    entity_type: str,
+    mode: str,
+    value_replacements: dict[tuple[str, str], str] | None = None,
+) -> str:
+    if value_replacements and (entity_type, value) in value_replacements:
+        return value_replacements[(entity_type, value)]
+    if mode == "remove":
+        return ""
+    if mode == "mask":
+        return _mask_value(value, entity_type)
+    return REDACT_PLACEHOLDERS.get(entity_type, DEFAULT_PLACEHOLDER)
+
+
 # ── Format-Preserving File Generators ──────────────────────────────
 
 def sanitize_file(
@@ -127,6 +184,8 @@ def sanitize_file(
     filename: str,
     detections: list[dict[str, Any]],
     mode: str = "redact",
+    replacements: dict[tuple[int, int], str] | None = None,
+    value_replacements: dict[tuple[str, str], str] | None = None,
 ) -> tuple[bytes, str, str]:
     """
     Sanitize an uploaded file and generate output in the exact same format.
@@ -139,13 +198,13 @@ def sanitize_file(
     sanitized_filename = f"{stem}_sanitized{ext_with_dot}"
 
     if ext == "pdf":
-        return sanitize_pdf(original_bytes, sanitized_filename, detections, mode)
+        return sanitize_pdf(original_bytes, sanitized_filename, detections, mode, value_replacements)
     elif ext == "docx":
-        return sanitize_docx(original_bytes, sanitized_filename, detections, mode)
+        return sanitize_docx(original_bytes, sanitized_filename, detections, mode, value_replacements)
     elif ext in ("png", "jpg", "jpeg"):
         return sanitize_image(original_bytes, sanitized_filename, ext, detections, mode)
     elif ext == "txt":
-        return sanitize_txt(original_bytes, sanitized_filename, detections, mode)
+        return sanitize_txt(original_bytes, sanitized_filename, detections, mode, replacements)
     else:
         # Fallback to plain text if format is unexpected
         sanitized_txt = sanitize(original_bytes.decode("utf-8", errors="replace"), detections, mode)
@@ -161,6 +220,7 @@ def sanitize_pdf(
     sanitized_filename: str,
     detections: list[dict[str, Any]],
     mode: str = "redact",
+    value_replacements: dict[tuple[str, str], str] | None = None,
 ) -> tuple[bytes, str, str]:
     """
     Sanitize PDF using PyMuPDF.
@@ -192,17 +252,17 @@ def sanitize_pdf(
                         rects.extend(page.search_for(sub))
 
             for r in rects:
-                if mode == "mask":
-                    masked = _mask_value(val, etype)
+                if mode == "remove":
+                    page.add_redact_annot(r, fill=(0, 0, 0))
+                else:
+                    label = _replacement_value(val, etype, mode, value_replacements)
                     page.add_redact_annot(
                         r,
-                        text=masked,
+                        text=label or "[REDACTED]",
                         fill=(0.93, 0.93, 0.93),
                         text_color=(0, 0, 0),
-                        fontsize=8,
+                        fontsize=8 if mode == "mask" else 6,
                     )
-                else:
-                    page.add_redact_annot(r, fill=(0, 0, 0))
 
         # Permanently erase glyphs & redraw underlying page stream
         page.apply_redactions(images=fitz.PDF_REDACT_IMAGE_PIXELS)
@@ -218,6 +278,7 @@ def sanitize_docx(
     sanitized_filename: str,
     detections: list[dict[str, Any]],
     mode: str = "redact",
+    value_replacements: dict[tuple[str, str], str] | None = None,
 ) -> tuple[bytes, str, str]:
     """
     Sanitize DOCX file using python-docx.
@@ -233,7 +294,7 @@ def sanitize_docx(
         etype = det.get("entity_type", "UNKNOWN")
         if not val:
             continue
-        rep = _mask_value(val, etype) if mode == "mask" else REDACT_PLACEHOLDERS.get(etype, DEFAULT_PLACEHOLDER)
+        rep = _replacement_value(val, etype, mode, value_replacements)
         replacements.append((val, rep))
 
     # Sort replacements by length descending to prevent substring collisions
@@ -403,6 +464,7 @@ def sanitize_txt(
     sanitized_filename: str,
     detections: list[dict[str, Any]],
     mode: str = "redact",
+    replacements: dict[tuple[int, int], str] | None = None,
 ) -> tuple[bytes, str, str]:
     """Sanitize TXT document."""
     text = ""
@@ -413,6 +475,6 @@ def sanitize_txt(
         except UnicodeDecodeError:
             continue
 
-    sanitized_text = sanitize(text, detections, mode)
+    sanitized_text = sanitize(text, detections, mode, replacements)
     return sanitized_text.encode("utf-8"), sanitized_filename, MIME_TYPES["txt"]
 
